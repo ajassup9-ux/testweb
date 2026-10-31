@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday 🎂</title>
+<style>
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+  }
+
+  body {
+    font-family: 'Trebuchet MS', 'Comic Sans MS', system-ui, sans-serif;
+    background: linear-gradient(-45deg, #ffd6e0, #ffe8b6, #d6f5ff, #e2d6ff, #ffd6f5);
+    background-size: 400% 400%;
+    animation: bgMove 18s ease infinite;
+    overflow-x: hidden;
+    color: #4a2b4a;
+  }
+
+  @keyframes bgMove {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* ---------- CANVAS CONFETTI ---------- */
+  #confetti {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* ---------- BALON ---------- */
+  .balloons {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .balloon {
+    position: absolute;
+    bottom: -160px;
+    left: var(--x, 50%);
+    width: calc(58px * var(--size, 1));
+    height: calc(72px * var(--size, 1));
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,.75), transparent 45%),
+      var(--color, #ff5e7e);
+    border-radius: 50% 50% 50% 50% / 45% 45% 55% 55%;
+    opacity: .9;
+    animation: floatUp var(--dur, 14s) linear infinite;
+    animation-delay: var(--delay, 0s);
+  }
+
+  .balloon::after {              /* simpul balon */
+    content: '';
+    position: absolute;
+    bottom: calc(-7px * var(--size, 1));
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: calc(6px * var(--size, 1)) solid transparent;
+    border-right: calc(6px * var(--size, 1)) solid transparent;
+    border-bottom: calc(9px * var(--size, 1)) solid var(--color, #ff5e7e);
+  }
+
+  .balloon::before {             /* tali balon */
+    content: '';
+    position: absolute;
+    bottom: calc(-58px * var(--size, 1));
+    left: 50%;
+    width: 2px;
+    height: calc(52px * var(--size, 1));
+    background: rgba(255,255,255,.75);
+    border-radius: 2px;
+    transform: translateX(-50%);
+  }
+
+  @keyframes floatUp {
+    0%   { transform: translateY(0) translateX(0) rotate(-4deg); }
+    25%  { transform: translateY(-30vh) translateX(22px) rotate(4deg); }
+    50%  { transform: translateY(-62vh) translateX(-18px) rotate(-4deg); }
+    75%  { transform: translateY(-95vh) translateX(16px) rotate(4deg); }
+    100% { transform: translateY(-135vh) translateX(-10px) rotate(-4deg); }
+  }
+
+  /* ---------- LAYOUT UTAMA ---------- */
+  .wrap {
+    position: relative;
+    z-index: 5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px 16px 40px;
+    text-align: center;
+  }
+
+  /* ---------- JUDUL ---------- */
+  .title {
+    margin: 0;
+    font-size: clamp(2.1rem, 9vw, 5rem);
+    font-weight: 900;
+    letter-spacing: 2px;
+    line-height: 1.1;
+    background: linear-gradient(90deg, #ff4d6d, #ff9e00, #ffd60a, #4dabf7, #b5179e, #ff4d6d);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: #ff4d6d;
+    animation: shine 6s linear infinite;
+    filter: drop-shadow(2px 5px 6px rgba(180, 0, 80, .18));
+  }
+
+  @keyframes shine {
+    to { background-position: 300% 0; }
+  }
+
+  .title span {
+    display: inline-block;
+    animation: letterBounce 1.5s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.055s);
+  }
+
+  @keyframes letterBounce {
+    0%, 55%, 100% { transform: translateY(0) rotate(0deg); }
+    25%           { transform: translateY(-18px) rotate(-7deg); }
+    40%           { transform: translateY(-4px) rotate(5deg); }
+  }
+
+  .sub {
+    font-size: clamp(1rem, 3.6vw, 1.45rem);
+    font-weight: 800;
+    color: #b5179e;
+    letter-spacing: .5px;
+    animation: pop 2.2s ease-in-out infinite;
+  }
+
+  @keyframes pop {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.09); }
+  }
+
+  /* ---------- KUE ---------- */
+  .cake {
+    position: relative;
+    width: 250px;
+    height: 270px;
+    margin: 6px auto 0;
+    animation: cakeFloat 3s ease-in-out infinite;
+  }
+
+  @keyframes cakeFloat {
+    0%, 100% { transform: translateY(0) rotate(-1deg); }
+    50%      { transform: translateY(-12px) rotate(1deg); }
+  }
+
+  .plate {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 250px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(#ffffff, #dcdce6);
+    box-shadow: 0 8px 20px rgba(90, 40, 90, .22);
+  }
+
+  .layer {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 12px 12px 8px 8px;
+    box-shadow:
+      inset -10px 0 16px rgba(0,0,0,.10),
+      inset 10px 0 16px rgba(255,255,255,.28),
+      0 6px 14px rgba(120, 60, 120, .18);
+  }
+
+  /* frosting putih bergerigi di atas tiap lapisan */
+  .layer::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -10px;
+    height: 30px;
+    background-image:
+      radial-gradient(circle at 12px 16px, #ffffff 12px, transparent 13px),
+      linear-gradient(#ffffff, #ffffff);
+    background-size: 24px 30px, 100% 16px;
+    background-repeat: repeat-x, no-repeat;
+    background-position: 0 0, 0 0;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .layer.top { bottom: 140px; width: 104px; height: 52px; background: linear-gradient(#d8a97a, #b07a4a); }
+  .layer.mid { bottom: 82px;  width: 158px; height: 62px; background: linear-gradient(#ffe1a8, #ffc861); }
+  .layer.bot { bottom: 16px;  width: 210px; height: 70px; background: linear-gradient(#ffb3c8, #ff7fa8); }
+
+  /* ---------- LILIN ---------- */
+  .candle {
+    position: absolute;
+    bottom: 188px;
+    left: 50%;
+    width: 12px;
+    height: 46px;
+    margin-left: calc(var(--x) - 6px);
+    background: repeating-linear-gradient(45deg, #ffffff 0 4px, #ff5e7e 4px 8px);
+    border-radius: 4px 4px 2px 2px;
+    box-shadow: inset -2px 0 4px rgba(0,0,0,.18);
+    z-index: 3;
+  }
+
+  .flame {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    width: 15px;
+    height: 15px;
+    margin-left: -7.5px;
+    background: radial-gradient(circle at 65% 65%, #fff8b0, #ffd93d 40%, #ff9800 75%, #ff5722);
+    border-radius: 0 50% 50% 50%;
+    transform: rotate(45deg);
+    transform-origin: 50% 50%;
+    animation: flicker .45s ease-in-out infinite alternate;
+    animation-delay: var(--d, 0s);
+    box-shadow: 0 0 16px 5px rgba(255, 170, 0, .75);
+    transition: opacity .35s ease, transform .35s ease;
+  }
+
+  @keyframes flicker {
+    from { transform: rotate(45deg) scale(1);       opacity: 1; }
+    to   { transform: rotate(45deg) scale(.82, 1.15); opacity: .85; }
+  }
+
+  .cake.blown .flame {
+    animation: none;
+    opacity: 0;
+    transform: rotate(45deg) scale(0);
+    box-shadow: none;
+  }
+
+  /* ---------- PESAN & TOMBOL ---------- */
+  .msg {
+    margin: 4px 0 0;
+    max-width: 430px;
+    font-size: clamp(.95rem, 3vw, 1.15rem);
+    font-weight: 700;
+    line-height: 1.65;
+    color: #6a3d6a;
+  }
+
+  .btn {
+    margin-top: 8px;
+    padding: 14px 32px;
+    font-family: inherit;
+    font-size: 1.05rem;
+    font-weight: 900;
+    letter-spacing: .4px;
+    color: #fff;
+    background: linear-gradient(135deg, #ff5e7e, #ff9e00);
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 8px 22px rgba(255, 94, 126, .45);
+    transition: transform .15s ease, box-shadow .2s ease;
+    animation: btnPulse 2s ease-in-out infinite;
+  }
+
+  .btn:hover  { transform: translateY(-3px) scale(1.05); }
+  .btn:active { transform: scale(.94); }
+
+  @keyframes btnPulse {
+    0%, 100% { box-shadow: 0 8px 22px rgba(255, 94, 126, .45); }
+    50%      { box-shadow: 0 8px 34px rgba(255, 158, 0, .75); }
+  }
+
+  @media (max-width: 380px) {
+    .cake { transform: scale(.85); }
+  }
+</style>
+</head>
+<body>
+
+  <canvas id="confetti"></canvas>
+  <div class="balloons" id="balloons"></div>
+
+  <div class="wrap">
+    <h1 class="title">Happy Birthday</h1>
+    <div class="sub">🎉 Selamat Ulang Tahun 🎉</div>
+
+    <div class="cake" id="cake">
+      <div class="plate"></div>
+      <div class="layer top"></div>
+      <div class="layer mid"></div>
+      <div class="layer bot"></div>
+
+      <div class="candle" style="--x:-34px; --d:0s"><i class="flame"></i></div>
+      <div class="candle" style="--x:0px;   --d:.25s"><i class="flame"></i></div>
+      <div class="candle" style="--x:34px;  --d:.5s"><i class="flame"></i></div>
+    </div>
+
+    <p class="msg">Semoga panjang umur, sehat selalu,<br>dan semua impianmu terkabul! 💖</p>
+
+    <button class="btn" id="blowBtn">Tiup Lilin 🎂</button>
+  </div>
+
+<script>
+/* ============================================================
+   1. PECAH JUDUL JADI HURUF-HURUF YANG MEMANTUL
+   ============================================================ */
+(function splitTitle() {
+  const title = document.querySelector('.title');
+  const text = title.textContent.trim();
+  title.textContent = '';
+  [...text].forEach((ch, i) => {
+    const span = document.createElement('span');
+    span.textContent = (ch === ' ') ? '\u00A0' : ch;
+    span.style.setProperty('--i', i);
+    title.appendChild(span);
+  });
+})();
+
+/* ============================================================
+   2. BALON-BALON TERBANG
+   ============================================================ */
+(function makeBalloons() {
+  const colors = ['#ff5e7e', '#ffd93d', '#6bcb77', '#4d96ff', '#c77dff', '#ff9e00', '#ff8fab', '#00d4ff'];
+  const box = document.getElementById('balloons');
+
+  for (let i = 0; i < 14; i++) {
+    const b = document.createElement('div');
+    b.className = 'balloon';
+    b.style.setProperty('--x', (Math.random() * 100).toFixed(1) + '%');
+    b.style.setProperty('--color', colors[Math.floor(Math.random() * colors.length)]);
+    b.style.setProperty('--dur', (11 + Math.random() * 11).toFixed(1) + 's');
+    b.style.setProperty('--delay', (-Math.random() * 22).toFixed(1) + 's');
+    b.style.setProperty('--size', (0.55 + Math.random() * 0.75).toFixed(2));
+    box.appendChild(b);
+  }
+})();
+
+/* ============================================================
+   3. CONFETTI PAKAI CANVAS
+   ============================================================ */
+(function confettiEngine() {
+  const canvas = document.getElementById('confetti');
+  const ctx = canvas.getContext('2d');
+  let W = 0, H = 0;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const COLORS = ['#ff5e7e', '#ffd93d', '#6bcb77', '#4d96ff', '#c77dff', '#ff9e00', '#ff8fab', '#00d4ff'];
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const pieces = [];
+
+  class Confetti {
+    constructor(opts = {}) {
+      this.x = (opts.x !== undefined) ? opts.x : Math.random() * W;
+      this.y = (opts.y !== undefined) ? opts.y : -20;
+      const burst = !!opts.burst;
+
+      this.color = COLORS[(Math.random() * COLORS.length) | 0];
+      this.size  = rand(6, 13);
+      this.vx    = burst ? rand(-10, 10) : rand(-0.8, 0.8);
+      this.vy    = burst ? rand(-15, -2) : rand(1.5, 4);
+      this.rot   = rand(0, Math.PI * 2);
+      this.vr    = rand(-0.22, 0.22);
+      this.grav  = 0.19;
+      this.wob   = rand(0, Math.PI * 2);
+      this.wobSp = rand(0.03, 0.1);
+      this.amp   = rand(0.4, 2.2);
+      this.shape = Math.random() < 0.35 ? 'circle' : 'rect';
+      this.dead  = false;
+    }
+
+    update() {
+      this.wob += this.wobSp;
+      this.x += this.vx + Math.sin(this.wob) * this.amp;
+      this.y += this.vy;
+      this.vy += this.grav;
+      this.vx *= 0.99;
+      this.rot += this.vr;
+
+      if (this.y > H + 60 || this.x < -80 || this.x > W + 80) this.dead = true;
+    }
+
+    draw() {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.rot);
+      ctx.fillStyle = this.color;
+
+      if (this.shape === 'circle') {
+        ctx.beginPath();
+        ctx.arc(0, 0, this.size / 2, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillRect(-this.size / 2, -this.size / 4, this.size, this.size / 2);
+      }
+      ctx.restore();
+    }
+  }
+
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+
+    // hujan confetti terus-menerus
+    if (pieces.length < 170 && Math.random() < 0.55) {
+      pieces.push(new Confetti());
+    }
+
+    for (let i = pieces.length - 1; i >= 0; i--) {
+      const p = pieces[i];
+      p.update();
+      p.draw();
+      if (p.dead) pieces.splice(i, 1);
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  /* ledakan confetti dari tengah */
+  window.confettiBurst = function (n = 130) {
+    const cx = W / 2;
+    const cy = H * 0.55;
+    for (let i = 0; i < n; i++) {
+      pieces.push(new Confetti({ x: cx, y: cy, burst: true }));
+    }
+  };
+})();
+
+/* ============================================================
+   4. TOMBOL TIUP LILIN
+   ============================================================ */
+(function blowCandles() {
+  const cake = document.getElementById('cake');
+  const btn  = document.getElementById('blowBtn');
+  let blown = false;
+
+  btn.addEventListener('click', () => {
+    blown = !blown;
+    cake.classList.toggle('blown', blown);
+    btn.textContent = blown ? 'Nyalain Lagi 🕯️' : 'Tiup Lilin 🎂';
+    if (blown) window.confettiBurst(140);
+  });
+})();
+
+/* ============================================================
+   5. LEDAKAN PEMBUKA
+   ============================================================ */
+setTimeout(() => window.confettiBurst(110), 700);
+setTimeout(() => window.confettiBurst(70), 2200);
+</script>
+</body>
+</html>
