@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Userbot Manager</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --bg1:#0d1320; --bg2:#070a12;
+    --accent:#34e0a1; --accent2:#1f8fff;
+    --txt:#eef3fb; --muted:#8a9bb6;
+    --glass:rgba(255,255,255,.045); --glass2:rgba(255,255,255,.07);
+    --line:rgba(255,255,255,.09);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+  html,body{height:100%}
+  body{
+    font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,sans-serif;
+    color:var(--txt);
+    background:linear-gradient(180deg,var(--bg1),var(--bg2));
+    background-attachment:fixed;
+    min-height:100vh; overflow-x:hidden; position:relative;
+    padding-bottom:90px;
+  }
+  .glow{position:fixed; border-radius:50%; filter:blur(70px); opacity:.5; z-index:0; pointer-events:none}
+  .glow.a{width:300px;height:300px; background:var(--accent); top:-120px; left:-80px; animation:float1 14s ease-in-out infinite}
+  .glow.b{width:260px;height:260px; background:var(--accent2); top:40px; right:-110px; animation:float2 18s ease-in-out infinite}
+  body.noanim .glow{animation:none}
+  @keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,50px)}}
+  @keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-40px,40px)}}
+
+  .app{position:relative; z-index:1}
+  .hero{height:150px; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative}
+  .orb{
+    width:74px;height:74px;border-radius:22px; display:flex;align-items:center;justify-content:center; font-size:38px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    box-shadow:0 12px 40px rgba(52,224,161,.35), inset 0 2px 8px rgba(255,255,255,.3); margin-bottom:10px;
+  }
+  .hero h1{font-size:18px; font-weight:800; letter-spacing:1.5px; opacity:.95}
+  .hero .tag{font-size:11px; color:var(--muted); letter-spacing:2px; margin-top:2px; text-transform:uppercase}
+
+  .wrap{padding:6px 16px 0; max-width:540px; margin:0 auto}
+  .glass{background:var(--glass); border:1px solid var(--line); border-radius:20px; backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); box-shadow:0 8px 32px rgba(0,0,0,.3)}
+  .usercard{padding:16px; display:flex; align-items:center; gap:14px}
+  .avatar{width:54px;height:54px;border-radius:16px; flex-shrink:0; display:flex;align-items:center;justify-content:center; font-weight:800; font-size:20px; color:#06140d; background:linear-gradient(135deg,var(--accent),var(--accent2)); box-shadow:0 6px 18px rgba(0,0,0,.3)}
+  .uinfo{flex:1; min-width:0}
+  .uinfo .h{font-size:16px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .uinfo .s{font-size:12px; color:var(--muted); margin-top:2px}
+  .rbadge{display:inline-flex; align-items:center; gap:5px; margin-top:7px; font-size:11px; font-weight:800; padding:5px 11px; border-radius:20px; background:rgba(52,224,161,.14); color:var(--accent); border:1px solid rgba(52,224,161,.32)}
+
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px}
+  .tile{padding:16px 14px; border-radius:18px; cursor:pointer; position:relative; overflow:hidden; background:var(--glass); border:1px solid var(--line); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); transition:transform .14s ease, border-color .14s ease; display:flex; flex-direction:column; gap:7px}
+  .tile:active{transform:scale(.95); border-color:var(--accent)}
+  .tile .ic{width:40px;height:40px;border-radius:12px; display:flex;align-items:center;justify-content:center; font-size:21px; background:var(--glass2)}
+  .tile .t{font-weight:700; font-size:14px}
+  .tile .d{color:var(--muted); font-size:11px; line-height:1.4}
+  .tile.full{grid-column:1 / -1}
+  .tile.cta{background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none}
+  .tile.cta .ic{background:rgba(255,255,255,.22)}
+  .tile.cta .d{color:rgba(4,19,12,.75)}
+  .tile.cta .t{color:#04130c}
+  .tile .arrow{position:absolute; top:14px; right:14px; opacity:.4; font-size:15px}
+
+  .foot{text-align:center; color:var(--muted); font-size:11px; margin-top:22px; line-height:1.7}
+  .foot b{color:var(--accent)}
+
+  .fab{position:fixed; right:18px; bottom:24px; z-index:60; width:54px;height:54px;border-radius:50%; cursor:pointer; display:flex;align-items:center;justify-content:center; font-size:24px; background:linear-gradient(135deg,var(--accent2),var(--accent)); box-shadow:0 8px 26px rgba(0,0,0,.45), inset 0 2px 6px rgba(255,255,255,.25); transition:transform .15s; color:#fff}
+  .fab:active{transform:scale(.9) rotate(40deg)}
+
+  .overlay{position:fixed; inset:0; background:rgba(4,7,12,.66); backdrop-filter:blur(4px); opacity:0; pointer-events:none; transition:.22s; z-index:70}
+  .overlay.show{opacity:1; pointer-events:auto}
+  .sheet{position:fixed; left:0; right:0; bottom:0; z-index:80; background:linear-gradient(180deg,#121a28,#0c1018); border-radius:26px 26px 0 0; border-top:1px solid var(--line); padding:18px 18px calc(28px + env(safe-area-inset-bottom)); transform:translateY(110%); transition:transform .28s cubic-bezier(.2,.85,.25,1); max-height:86vh; overflow-y:auto; box-shadow:0 -10px 40px rgba(0,0,0,.5)}
+  .sheet.show{transform:translateY(0)}
+  .grab{width:42px;height:4px;background:var(--line);border-radius:3px;margin:0 auto 16px}
+  .sheet h2{font-size:19px; margin-bottom:4px; display:flex; align-items:center; gap:9px}
+  .sheet .lead{color:var(--muted); font-size:13px; line-height:1.6; margin-bottom:6px}
+  .sec-title{font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin:18px 0 10px}
+
+  .plan{border:1px solid var(--line); border-radius:18px; padding:15px 16px; margin-bottom:12px; background:var(--glass); position:relative; overflow:hidden}
+  .plan.hot{border-color:rgba(52,224,161,.5); box-shadow:0 0 0 1px rgba(52,224,161,.25)}
+  .plan .pop{position:absolute; top:0; right:0; background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#04130c; font-size:10px; font-weight:800; padding:4px 12px; border-radius:0 18px 0 12px; letter-spacing:.5px}
+  .plan .pname{font-size:16px; font-weight:800; display:flex; align-items:center; gap:8px}
+  .plan .pdesc{font-size:12px; color:var(--muted); margin:5px 0 12px; line-height:1.5}
+  .price-row{display:flex; gap:10px}
+  .pcell{flex:1; background:var(--glass2); border:1px solid var(--line); border-radius:13px; padding:11px; text-align:center}
+  .pcell .lbl{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px}
+  .pcell .val{font-size:18px; font-weight:800; margin-top:3px}
+
+  .row{display:flex; align-items:center; gap:10px; padding:12px 0; border-bottom:1px solid var(--line); font-size:14px}
+  .row:last-child{border-bottom:none}
+  .row .v{margin-left:auto; font-weight:700; color:var(--accent)}
+  .cat{display:inline-block; background:var(--glass2); border:1px solid var(--line); padding:7px 12px; border-radius:18px; font-size:12px; margin:0 6px 6px 0}
+
+  .btn{display:block;width:100%;text-align:center;padding:14px;border-radius:14px;border:none;cursor:pointer;font-weight:800;font-size:15px;margin-top:14px; background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#04130c}
+  .btn:active{transform:scale(.98)}
+  .btn.sec{background:var(--glass2); color:var(--txt); border:1px solid var(--line)}
+
+  .swatches{display:flex; gap:12px; flex-wrap:wrap}
+  .sw{width:54px; text-align:center; cursor:pointer}
+  .sw .dot{width:48px;height:48px;border-radius:14px; border:2px solid transparent; transition:.15s; box-shadow:0 4px 12px rgba(0,0,0,.35)}
+  .sw.active .dot{border-color:#fff; transform:scale(1.06)}
+  .sw .nm{font-size:10px; color:var(--muted); margin-top:5px}
+  .picker-row{display:flex; gap:12px; margin-top:6px}
+  .pick{flex:1}
+  .pick label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px}
+  .pick input[type=color]{width:100%; height:46px; border:1px solid var(--line); border-radius:12px; background:var(--glass2); cursor:pointer; padding:4px}
+  .preview{height:54px; border-radius:14px; margin-top:12px; border:1px solid var(--line)}
+  .toggle{display:flex; align-items:center; gap:10px; padding:13px 0; border-bottom:1px solid var(--line); font-size:14px}
+  .toggle:last-child{border-bottom:none}
+  .sw-toggle{margin-left:auto; width:46px; height:26px; border-radius:20px; background:var(--glass2); border:1px solid var(--line); position:relative; transition:.2s; cursor:pointer}
+  .sw-toggle .knob{position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:#8a9bb6; transition:.2s}
+  .sw-toggle.on{background:linear-gradient(135deg,var(--accent),var(--accent2))}
+  .sw-toggle.on .knob{left:22px; background:#fff}
+</style>
+</head>
+<body>
+  <div class="glow a"></div>
+  <div class="glow b"></div>
+
+  <div class="app">
+    <div class="hero">
+      <div class="orb">🤖</div>
+      <h1 id="botName">USERBOT MANAGER</h1>
+      <div class="tag">Premium Userbot Service</div>
+    </div>
+
+    <div class="wrap">
+      <div class="usercard glass">
+        <div class="avatar" id="avatar">U</div>
+        <div class="uinfo">
+          <div class="h" id="hello">Halo</div>
+          <div class="s" id="uid">ID: -</div>
+          <span class="rbadge" id="roleBadge">Owner</span>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="tile cta full" data-act="connect">
+          <div class="ic">🤖</div>
+          <div class="t">Buat / Sambungkan Userbot</div>
+          <div class="d">Aktifkan ubot kamu lewat nomor + OTP atau API sendiri</div>
+        </div>
+        <div class="tile" data-tab="beli">
+          <span class="arrow">›</span><div class="ic">💎</div>
+          <div class="t">Beli Akses</div><div class="d">Premium sampai Ceo</div>
+        </div>
+        <div class="tile" data-tab="upgrade">
+          <span class="arrow">›</span><div class="ic">⚡</div>
+          <div class="t">Role System</div><div class="d">Jenjang & benefit</div>
+        </div>
+        <div class="tile" data-tab="help">
+          <span class="arrow">›</span><div class="ic">📖</div>
+          <div class="t">Help Menu</div><div class="d">300+ command</div>
+        </div>
+        <div class="tile" data-tab="group">
+          <span class="arrow">›</span><div class="ic">👥</div>
+          <div class="t">Group Ubot</div><div class="d">Komunitas & info</div>
+        </div>
+        <div class="tile full" data-tab="support">
+          <span class="arrow">›</span><div class="ic">🛟</div>
+          <div class="t">Support</div><div class="d">Hubungi owner kalau ada kendala</div>
+        </div>
+      </div>
+
+      <div class="foot" id="foot">UBot Manager</div>
+    </div>
+  </div>
+
+  <div class="fab" id="fab">⚙️</div>
+
+  <div class="overlay" id="overlay"></div>
+  <div class="sheet" id="sheet">
+    <div class="grab"></div>
+    <div id="sheetBody"></div>
+  </div>
+
+<script>
+  var tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+  try { tg.ready(); tg.expand(); } catch(e){}
+  function haptic(t){ try{ tg.HapticFeedback.impactOccurred(t||"light"); }catch(e){} }
+
+  var q = new URLSearchParams(location.search);
+  function dec(k, def){ try{ var v=q.get(k); return v!==null ? decodeURIComponent(v) : (def||""); }catch(e){ return q.get(k)||def||""; } }
+  var tgUser = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : {};
+  var name = dec("name", tgUser.first_name || "Kak");
+  var role = (dec("role","user") || "user").toLowerCase();
+  var uid  = dec("uid", tgUser.id ? String(tgUser.id) : "-");
+  var owners = dec("owners","@dimazgwcadangan1").split(",").map(function(s){return s.trim();}).filter(Boolean);
+  var botName = dec("bot","@Userbot_Forgot_bot");
+
+  var roleMap = {
+    pemilik:["Pemilik","#34e0a1","💎"], ceo:["Ceo","#ffd54a","🌟"], tk:["Tk","#4ad7ff","🔱"],
+    owner:["Owner","#f5b942","👑"], admin:["Admin","#ff6b6b","🛡️"],
+    reseller:["Reseller","#a695e7","💼"], prem:["Premium","#34e0a1","💎"],
+    premium:["Premium","#34e0a1","💎"], user:["User","#8a9bb6","👤"]
+  };
+  var rm = roleMap[role] || roleMap.user;
+  document.getElementById("botName").textContent = (botName.replace("@","")||"USERBOT").toUpperCase() + " MANAGER";
+  document.getElementById("hello").textContent = "Halo, " + name + " 👋";
+  document.getElementById("uid").textContent = "ID: " + uid;
+  document.getElementById("avatar").textContent = ((name.trim()[0]) || "U").toUpperCase();
+  var rb = document.getElementById("roleBadge");
+  rb.textContent = rm[2] + " " + rm[0]; rb.style.color = rm[1];
+  rb.style.borderColor = rm[1] + "55"; rb.style.background = rm[1] + "22";
+  document.getElementById("foot").innerHTML = botName + " &bull; <b>Mini App</b>";
+
+  var PRESETS = [
+    {nm:"Midnight", bg1:"#0d1320", bg2:"#070a12", accent:"#34e0a1", accent2:"#1f8fff"},
+    {nm:"Ocean",    bg1:"#081a2c", bg2:"#040d18", accent:"#1f8fff", accent2:"#00e0d4"},
+    {nm:"Emerald",  bg1:"#07160f", bg2:"#030d08", accent:"#27c46b", accent2:"#00e0a0"},
+    {nm:"Royal",    bg1:"#150f2c", bg2:"#0a0718", accent:"#a695e7", accent2:"#6c5ce7"},
+    {nm:"Sunset",   bg1:"#22110b", bg2:"#140705", accent:"#ff8a5b", accent2:"#f0941e"},
+    {nm:"Rose",     bg1:"#220b16", bg2:"#14050d", accent:"#ff6b9d", accent2:"#ff4757"},
+    {nm:"Mono",     bg1:"#16191d", bg2:"#0b0d0f", accent:"#d9dee6", accent2:"#9aa3ad"}
+  ];
+  var DEF = { bg1:"#0d1320", bg2:"#070a12", accent:"#34e0a1", accent2:"#1f8fff", anim:true };
+  var prefs = {}; for(var k0 in DEF) prefs[k0]=DEF[k0];
+  try { var saved = JSON.parse(localStorage.getItem("ubotMiniTheme")||"null"); if(saved){ for(var k in saved) prefs[k]=saved[k]; } } catch(e){}
+
+  function applyTheme(){
+    var r = document.documentElement.style;
+    r.setProperty("--bg1", prefs.bg1); r.setProperty("--bg2", prefs.bg2);
+    r.setProperty("--accent", prefs.accent); r.setProperty("--accent2", prefs.accent2);
+    document.body.classList.toggle("noanim", !prefs.anim);
+    try { tg.setBackgroundColor && tg.setBackgroundColor(prefs.bg2); tg.setHeaderColor && tg.setHeaderColor(prefs.bg1); } catch(e){}
+  }
+  function saveTheme(){ try{ localStorage.setItem("ubotMiniTheme", JSON.stringify(prefs)); }catch(e){} }
+  applyTheme();
+
+  function openOwner(){
+    var u = (owners[0]||"").replace("@","");
+    if(u){ try{ tg.openTelegramLink("https://t.me/"+u); }catch(e){ location.href="https://t.me/"+u; } }
+  }
+
+  var overlay = document.getElementById("overlay");
+  var sheet = document.getElementById("sheet");
+  var body = document.getElementById("sheetBody");
+  function showSheet(html){ body.innerHTML = html; overlay.classList.add("show"); sheet.classList.add("show"); haptic("light"); bindSheet(); }
+  function closeSheet(){ overlay.classList.remove("show"); sheet.classList.remove("show"); }
+  overlay.onclick = closeSheet;
+
+  function planHtml(nameP, desc, p30, pPerm, hot){
+    return '<div class="plan' + (hot?' hot':'') + '">' +
+      (hot?'<span class="pop">POPULER</span>':'') +
+      '<div class="pname">' + nameP + '</div>' +
+      '<div class="pdesc">' + desc + '</div>' +
+      '<div class="price-row">' +
+        '<div class="pcell"><div class="lbl">30 Hari</div><div class="val">Rp' + p30 + '</div></div>' +
+        '<div class="pcell"><div class="lbl">Permanen</div><div class="val">Rp' + pPerm + '</div></div>' +
+      '</div></div>';
+  }
+  function tabBeli(){
+    var h = '<h2>💎 Beli Akses</h2>' +
+      '<div class="lead">Pilih paket sesuai kebutuhan. Transaksi masih manual — order langsung ke owner.</div>' +
+      '<div class="sec-title">Daftar Harga</div>' +
+      planHtml("💎 Premium", "Akses semua 300+ command, 1 userbot pribadi.", "1.000", "2.000", true) +
+      planHtml("💼 Reseller", "Bisa jual akses Premium ke orang lain.", "3.000", "4.000", false) +
+      planHtml("🛡️ Admin", "Bisa tambah Reseller & Premium.", "5.000", "7.000", false) +
+      planHtml("👑 Owner", "Bisa tambah Admin, Reseller & Premium.", "8.000", "10.000", false) +
+      planHtml("🔱 Tk", "Bisa tambah Owner ke bawah.", "11.000", "12.000", false) +
+      planHtml("🌟 Ceo", "Role tertinggi yang dijual — tambah Tk ke bawah.", "13.000", "15.000", false) +
+      '<button class="btn" data-do="owner">💬 Order ke Owner</button>' +
+      '<button class="btn sec" data-do="close">Tutup</button>';
+    showSheet(h);
+  }
+  function tabUpgrade(){
+    var h = '<h2>⚡ Role System</h2>' +
+      '<div class="lead">Sistem role berjenjang — makin tinggi, makin banyak yang bisa kamu tambah.</div>' +
+      '<div class="row"><span>💎 Pemilik</span><span class="v">Kuasa penuh</span></div>' +
+      '<div class="row"><span>🌟 Ceo</span><span class="v">Add Tk ke bawah</span></div>' +
+      '<div class="row"><span>🔱 Tk</span><span class="v">Add Owner ke bawah</span></div>' +
+      '<div class="row"><span>👑 Owner</span><span class="v">Add Admin ke bawah</span></div>' +
+      '<div class="row"><span>🛡️ Admin</span><span class="v">Add Reseller & Prem</span></div>' +
+      '<div class="row"><span>💼 Reseller</span><span class="v">Add Premium</span></div>' +
+      '<div class="row"><span>💎 Premium</span><span class="v">Pakai ubot</span></div>' +
+      '<div class="lead" style="margin-top:14px">Role kamu sekarang: <b style="color:'+rm[1]+'">'+rm[2]+" "+rm[0]+'</b></div>' +
+      '<button class="btn sec" data-do="close">Tutup</button>';
+    showSheet(h);
+  }
+  function tabHelp(){
+    var cats = ["Umum","Utilitas","Islami","Tools","Fun","Fonts","Encode","Text","Math","Convert","Generator","Grup","Blacklist","Promosi","Transaksi","Role"];
+    var chips=""; for(var i=0;i<cats.length;i++){ chips += '<span class="cat">'+cats[i]+'</span>'; }
+    var h = '<h2>📖 Help Menu</h2>' +
+      '<div class="lead">Ada <b style="color:var(--accent)">300+ command</b> di userbot kamu, terbagi dalam kategori:</div>' +
+      '<div style="margin:10px 0">' + chips + '</div>' +
+      '<div class="lead">Ketik <b>.help</b> di chat userbot untuk menu lengkap + tombol tiap command.</div>' +
+      '<button class="btn sec" data-do="close">Tutup</button>';
+    showSheet(h);
+  }
+  function tabGroup(){
+    var h = '<h2>👥 Group Ubot</h2>' +
+      '<div class="lead">Gabung komunitas untuk update, tutorial & tanya-jawab bareng user lain. Info grup tanya owner ya.</div>' +
+      '<button class="btn" data-do="owner">💬 Tanya Owner</button>' +
+      '<button class="btn sec" data-do="close">Tutup</button>';
+    showSheet(h);
+  }
+  function tabSupport(){
+    var ow=""; for(var i=0;i<owners.length;i++){ ow += '<div class="row"><span>👤 Owner</span><span class="v">'+owners[i]+'</span></div>'; }
+    var h = '<h2>🛟 Support</h2>' +
+      '<div class="lead">Ada kendala atau pertanyaan? Hubungi owner utama:</div>' + ow +
+      '<button class="btn" data-do="owner">💬 Chat Owner</button>' +
+      '<button class="btn sec" data-do="close">Tutup</button>';
+    showSheet(h);
+  }
+
+  function tabSettings(){
+    var sw="";
+    for(var i=0;i<PRESETS.length;i++){
+      var p = PRESETS[i];
+      var active = (p.bg1===prefs.bg1 && p.accent===prefs.accent) ? " active" : "";
+      sw += '<div class="sw'+active+'" data-preset="'+i+'">' +
+        '<div class="dot" style="background:linear-gradient(135deg,'+p.accent+','+p.accent2+')"></div>' +
+        '<div class="nm">'+p.nm+'</div></div>';
+    }
+    var h = '<h2>⚙️ Pengaturan</h2>' +
+      '<div class="lead">Ubah tampilan Mini App sesukamu. Tersimpan otomatis di HP kamu.</div>' +
+      '<div class="sec-title">Tema</div>' +
+      '<div class="swatches">' + sw + '</div>' +
+      '<div class="sec-title">Background Custom (Atas → Bawah)</div>' +
+      '<div class="picker-row">' +
+        '<div class="pick"><label>Warna Atas</label><input type="color" id="bgTop" value="'+prefs.bg1+'"></div>' +
+        '<div class="pick"><label>Warna Bawah</label><input type="color" id="bgBot" value="'+prefs.bg2+'"></div>' +
+      '</div>' +
+      '<div class="preview" id="bgPrev"></div>' +
+      '<div class="sec-title">Warna Aksen</div>' +
+      '<div class="picker-row">' +
+        '<div class="pick"><label>Aksen 1</label><input type="color" id="ac1" value="'+prefs.accent+'"></div>' +
+        '<div class="pick"><label>Aksen 2</label><input type="color" id="ac2" value="'+prefs.accent2+'"></div>' +
+      '</div>' +
+      '<div class="sec-title">Lainnya</div>' +
+      '<div class="toggle"><span>Animasi Background</span><div class="sw-toggle'+(prefs.anim?' on':'')+'" id="tgAnim"><div class="knob"></div></div></div>' +
+      '<button class="btn" data-do="close">Selesai</button>' +
+      '<button class="btn sec" data-do="reset">Reset ke Default</button>';
+    showSheet(h);
+    updatePrev();
+  }
+  function updatePrev(){ var pv=document.getElementById("bgPrev"); if(pv) pv.style.background = "linear-gradient(180deg,"+prefs.bg1+","+prefs.bg2+")"; }
+
+  function bindSheet(){
+    var btns = body.querySelectorAll("[data-do]");
+    for(var i=0;i<btns.length;i++){
+      btns[i].onclick = function(){
+        var act = this.getAttribute("data-do");
+        if(act==="owner") openOwner();
+        else if(act==="close") closeSheet();
+        else if(act==="reset"){ prefs={}; for(var k in DEF) prefs[k]=DEF[k]; applyTheme(); saveTheme(); tabSettings(); }
+      };
+    }
+    var sws = body.querySelectorAll("[data-preset]");
+    for(var j=0;j<sws.length;j++){
+      sws[j].onclick = function(){
+        var p = PRESETS[parseInt(this.getAttribute("data-preset"))];
+        prefs.bg1=p.bg1; prefs.bg2=p.bg2; prefs.accent=p.accent; prefs.accent2=p.accent2;
+        applyTheme(); saveTheme(); haptic("light"); tabSettings();
+      };
+    }
+    var bgTop=document.getElementById("bgTop"), bgBot=document.getElementById("bgBot"),
+        ac1=document.getElementById("ac1"), ac2=document.getElementById("ac2"), tgAnim=document.getElementById("tgAnim");
+    if(bgTop) bgTop.oninput=function(){ prefs.bg1=this.value; applyTheme(); saveTheme(); updatePrev(); };
+    if(bgBot) bgBot.oninput=function(){ prefs.bg2=this.value; applyTheme(); saveTheme(); updatePrev(); };
+    if(ac1) ac1.oninput=function(){ prefs.accent=this.value; applyTheme(); saveTheme(); };
+    if(ac2) ac2.oninput=function(){ prefs.accent2=this.value; applyTheme(); saveTheme(); };
+    if(tgAnim) tgAnim.onclick=function(){ prefs.anim=!prefs.anim; this.classList.toggle("on"); applyTheme(); saveTheme(); };
+  }
+
+  var TABS = { beli:tabBeli, upgrade:tabUpgrade, help:tabHelp, group:tabGroup, support:tabSupport };
+  var tiles = document.querySelectorAll(".tile");
+  for(var i=0;i<tiles.length;i++){
+    tiles[i].onclick = function(){
+      var tab = this.getAttribute("data-tab");
+      var act = this.getAttribute("data-act");
+      if(tab && TABS[tab]){ TABS[tab](); return; }
+      if(act==="connect"){
+        haptic("medium");
+        var did=false;
+        try { tg.sendData(JSON.stringify({action:"connect"})); did=true; } catch(e){}
+        if(!did){
+          var u = botName.replace("@","");
+          try { tg.openTelegramLink("https://t.me/"+u+"?start=connect"); }
+          catch(e){
+            try { tg.showAlert("Ketik /connect di chat untuk menyambungkan userbot."); }
+            catch(e2){ alert("Ketik /connect di chat untuk menyambungkan userbot."); }
+          }
+        }
+      }
+    };
+  }
+  document.getElementById("fab").onclick = function(){ haptic("light"); tabSettings(); };
+</script>
+</body>
+</html>
