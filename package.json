@@ -1,7 +1,0 @@
-{
-  "name": "telegram-report-dashboard",
-  "version": "1.0.0",
-  "dependencies": {
-    "telegram": "^2.19.10"
-  }
-}
