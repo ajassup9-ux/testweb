@@ -1,8 +1,6 @@
 {
-  "name": "telegram-report-web",
+  "name": "telegram-report-dashboard",
   "version": "1.0.0",
-  "description": "Web based Telegram Mass Report",
-  "main": "index.html",
   "dependencies": {
     "telegram": "^2.19.10"
   }
