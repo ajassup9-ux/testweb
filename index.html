@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AM Preset Finder - Real API</title>
+    <title>AM Preset Finder - Ultra Deep Scan</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -27,9 +27,6 @@
         .btn-primary { background: var(--primary); color: #000; border: none; border-radius: 8px; padding: 0 24px; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; }
         .btn-primary:active { transform: scale(0.95); }
 
-        .pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 24px; }
-        .pill { background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); padding: 8px 16px; border-radius: 20px; font-size: 12px; white-space: nowrap; }
-
         .loading-state { display: none; flex-direction: column; align-items: center; padding: 40px 0; gap: 16px; }
         .loading-state.active { display: flex; }
         .spinner { width: 32px; height: 32px; border: 3px solid rgba(0, 250, 126, 0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
@@ -38,7 +35,6 @@
         .result-state { display: none; flex-direction: column; gap: 16px; }
         .result-state.active { display: flex; }
         
-        /* Video Player */
         .video-box { width: 100%; aspect-ratio: 9/16; max-height: 500px; background: #000; border-radius: 8px; object-fit: cover; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
         
         .caption-text { font-size: 13px; color: #e0e0e0; line-height: 1.5; word-wrap: break-word; }
@@ -69,6 +65,7 @@
         .tag-group { display: flex; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
         .tag { background: rgba(0, 250, 126, 0.1); color: var(--primary); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; border: 1px solid rgba(0, 250, 126, 0.3); }
         .tag.dark { background: #2a2a2d; color: #a0a0a0; border-color: transparent; }
+        .tag.yellow { background: rgba(255, 204, 0, 0.1); color: #ffcc00; border-color: rgba(255, 204, 0, 0.3); }
         .link-box { background: #000; padding: 14px; border-radius: 8px; font-family: monospace; font-size: 12px; color: #a0a0a0; word-break: break-all; margin-bottom: 16px; border: 1px solid #222; }
         .action-btns { display: flex; gap: 12px; }
         .btn-action { flex: 1; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer; text-decoration: none; }
@@ -77,6 +74,8 @@
         
         .error-msg { background: #ff3333; color: white; padding: 12px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; display: none; }
         .hidden { display: none !important; }
+        
+        .progress-text { font-size: 13px; color: var(--primary); font-weight: 600; margin-top: 8px; text-align: center; }
     </style>
 </head>
 <body>
@@ -91,14 +90,14 @@
     <main>
         <div id="searchView">
             <div style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">
-                Masukkan link video TikTok. Sistem bakal nge-scan deskripsi + komentar buat nyari link AM.
+                Ultra Deep Scan: Nyari Link & Teks "Preset AM 5mb/XML" di Deskripsi + 1000 Komentar.
             </div>
             <div class="error-msg" id="errMsg"></div>
 
             <div class="search-container">
                 <div class="input-wrapper">
                     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" id="searchInput" placeholder="https://vt.tiktok.com/..." value="https://vt.tiktok.com/ZSgvc5kMx/">
+                    <input type="text" id="searchInput" placeholder="https://vt.tiktok.com/..." value="https://www.tiktok.com/@wanx.prstt/video/7347181243243441413">
                 </div>
                 <button class="btn-primary" onclick="handleSearch()">Cari</button>
             </div>
@@ -106,11 +105,11 @@
 
         <div class="loading-state" id="loadingState">
             <div class="spinner"></div>
-            <div style="font-weight: 600;">Memindai Video & Komentar...</div>
+            <div style="font-weight: 600;">Memindai Video...</div>
+            <div class="progress-text" id="progressText"></div>
         </div>
 
         <div class="result-state" id="resultState">
-            <!-- Tag Video Asli biar gerak -->
             <video id="resVideo" class="video-box" controls autoplay loop muted playsinline></video>
             
             <div class="caption-text" id="resDesc"></div>
@@ -144,7 +143,7 @@
 
             <div>
                 <div class="preset-section-title">
-                    <span>======///</span> Link preset <div class="badge-count" id="resPresetCount">0</div>
+                    <span>======///</span> Hasil Deteksi <div class="badge-count" id="resPresetCount">0</div>
                 </div>
                 <div id="presetContainer"></div>
             </div>
@@ -162,6 +161,7 @@
         async function handleSearch() {
             const input = document.getElementById('searchInput').value.trim();
             const errMsg = document.getElementById('errMsg');
+            const progressText = document.getElementById('progressText');
             
             if (!input) {
                 errMsg.innerText = 'Masukin link TikTok dulu, gng.';
@@ -173,6 +173,7 @@
             document.getElementById('searchView').classList.add('hidden');
             document.getElementById('loadingState').classList.add('active');
             document.getElementById('resultState').classList.remove('active');
+            progressText.innerText = 'Menarik data video utama...';
 
             try {
                 // 1. TARIK DATA VIDEO UTAMA
@@ -185,10 +186,10 @@
 
                 const data = json.data;
 
-                // Tampilin video asli (mp4)
+                // Tampilin video asli
                 const videoEl = document.getElementById('resVideo');
-                videoEl.src = data.play; // URL video dari API
-                videoEl.load(); // Force load video
+                videoEl.src = data.play; 
+                videoEl.load(); 
 
                 // Isi metadata
                 document.getElementById('resAuthor').innerText = '@' + data.author.unique_id;
@@ -201,59 +202,104 @@
                 document.getElementById('resMusicAuthor').innerText = data.music_info.author;
                 document.getElementById('resMusicCover').style.backgroundImage = `url(${data.music_info.cover})`;
 
-                // 2. TARIK DATA KOMENTAR
-                let textToScan = [data.title]; // Kumpulan teks (deskripsi + komen)
-                
-                try {
-                    const commentRes = await fetch(`https://www.tikwm.com/api/comment/list/?url=${encodeURIComponent(input)}&count=50`);
-                    const commentJson = await commentRes.json();
-                    
-                    if (commentJson.code === 0 && commentJson.data && commentJson.data.comments) {
-                        commentJson.data.comments.forEach(c => {
-                            textToScan.push(c.text);
-                        });
-                    }
-                } catch (e) {
-                    console.log("Gagal narik komen, lanjut scan deskripsi aja.");
+                // 2. ULTRA DEEP SCAN KOMENTAR (PAGINATION 1000)
+                let foundLinks = [];
+                let foundTexts = [];
+                let cursor = 0;
+                let hasMore = true;
+                let totalFetched = 0;
+
+                progressText.innerText = 'Memulai Ultra Deep Scan...';
+
+                // Scan deskripsi dulu
+                const urlRegex = /(https?:\/\/(?:www\.)?(?:alightcreative|alightmotion)\.com\/[^\s]+)/gi;
+                const textKeywords = /(?:preset\s*am|am\s*preset|preset\s*xml|xml\s*preset|preset\s*5mb|5mb\s*preset|am\s*xml|xml\s*am|alightmotion)/i;
+
+                const descUrls = data.title.match(urlRegex);
+                if (descUrls) descUrls.forEach(u => foundLinks.push(u.replace(/[.,;!?]+$/, '')));
+
+                if (textKeywords.test(data.title)) {
+                    foundTexts.push({ text: data.title, source: 'Deskripsi' });
                 }
 
-                // 3. SCAN LINK AM DI SEMUA TEKS (DESKRIPSI + KOMEN)
+                // Loop Komen
+                while (hasMore && totalFetched < 1000) {
+                    progressText.innerText = `Memindai komentar (${totalFetched} / 1000)...`;
+                    
+                    try {
+                        const commentRes = await fetch(`https://www.tikwm.com/api/comment/list/?url=${encodeURIComponent(input)}&count=50&cursor=${cursor}`);
+                        const commentJson = await commentRes.json();
+                        
+                        if (commentJson.code === 0 && commentJson.data && commentJson.data.comments && commentJson.data.comments.length > 0) {
+                            let foundUrlInPage = false;
+
+                            commentJson.data.comments.forEach(c => {
+                                // Cek Link
+                                const urls = c.text.match(urlRegex);
+                                if (urls) {
+                                    urls.forEach(u => {
+                                        const cleanLink = u.replace(/[.,;!?]+$/, '');
+                                        if (!foundLinks.includes(cleanLink)) {
+                                            foundLinks.push(cleanLink);
+                                            foundUrlInPage = true;
+                                        }
+                                    });
+                                }
+
+                                // Cek Teks (AM 5MB, XML, dll)
+                                if (textKeywords.test(c.text) && c.text.length < 150) {
+                                    // Biar gak double, cek dulu
+                                    if (!foundTexts.some(ft => ft.text === c.text)) {
+                                        foundTexts.push({ text: c.text, source: 'Komentar' });
+                                    }
+                                }
+                            });
+                            
+                            totalFetched += commentJson.data.comments.length;
+                            const newCursor = commentJson.data.cursor;
+                            hasMore = commentJson.data.has_more && newCursor !== cursor; 
+                            cursor = newCursor;
+
+                            // Kalau URL alightcreative udah ketemu di page ini, kita stop narik komen (karena udah dapet target utama)
+                            if (foundUrlInPage) {
+                                progressText.innerText = `Link AM ketemu di komen ke-${totalFetched}! Menyelesaikan...`;
+                                hasMore = false; 
+                            }
+                        } else {
+                            hasMore = false; // Kalo gagal / udah abis
+                        }
+                    } catch (e) {
+                        console.log("Error fetching comments page.");
+                        hasMore = false;
+                    }
+                    
+                    await new Promise(r => setTimeout(r, 300)); // Delay anti rate-limit
+                }
+
+                progressText.innerText = `Selesai memindai ${totalFetched} komentar.`;
+
+                // 3. RENDER HASIL
                 const container = document.getElementById('presetContainer');
                 const countBadge = document.getElementById('resPresetCount');
                 container.innerHTML = '';
                 
-                const regexAM = /(https?:\/\/(?:www\.)?alightcreative\.com\/[^\s]+)/g;
-                let amLinks = [];
-                
-                textToScan.forEach(text => {
-                    const matches = text.match(regexAM);
-                    if (matches) {
-                        matches.forEach(link => {
-                            // Bersihin sisa tanda baca di ujung link
-                            const cleanLink = link.replace(/[.,;!?]+$/, '');
-                            if (!amLinks.includes(cleanLink)) {
-                                amLinks.push(cleanLink);
-                            }
-                        });
-                    }
-                });
-                
-                countBadge.innerText = amLinks.length;
+                const totalFound = foundLinks.length + foundTexts.length;
+                countBadge.innerText = totalFound;
 
-                if (amLinks.length === 0) {
-                    container.innerHTML = `<div style="color: var(--text-muted); font-size: 14px; padding: 10px; background: var(--surface); border-radius: 8px; border: 1px solid var(--border);">Gak ada link Alight Motion di deskripsi atau 50 komen teratas video ini.</div>`;
+                if (totalFound === 0) {
+                    container.innerHTML = `<div style="color: var(--text-muted); font-size: 14px; padding: 10px; background: var(--surface); border-radius: 8px; border: 1px solid var(--border);">Gila, udah di-scan sampai ${totalFetched} komen tetep gak ada link atau teks preset AM-nya. Berarti beneran kosong gng.</div>`;
                 } else {
-                    amLinks.forEach((link, i) => {
+                    // Render Link yang ketemu
+                    foundLinks.forEach((link, i) => {
                         const card = document.createElement('div');
                         card.className = 'preset-card';
                         card.innerHTML = `
                             <div class="preset-header">
                                 <div class="preset-thumb" style="background-image: url('${data.cover}')"></div>
                                 <div class="preset-info">
-                                    <h4>Preset AM #${i + 1}</h4>
+                                    <h4>Link AM #${i + 1}</h4>
                                     <div class="tag-group">
                                         <span class="tag">REAL LINK</span>
-                                        <span class="tag dark">AMAN</span>
                                     </div>
                                     <div class="preset-sub">Ditemukan otomatis</div>
                                 </div>
@@ -267,6 +313,27 @@
                                     Salin
                                 </button>
                             </div>
+                        `;
+                        container.appendChild(card);
+                    });
+
+                    // Render Teks yang nyebut "Preset AM 5mb" dll
+                    foundTexts.forEach((item, i) => {
+                        const card = document.createElement('div');
+                        card.className = 'preset-card';
+                        card.innerHTML = `
+                            <div class="preset-header">
+                                <div class="preset-thumb" style="background-image: url('${data.cover}')"></div>
+                                <div class="preset-info">
+                                    <h4>Teks Deteksi #${i + 1}</h4>
+                                    <div class="tag-group">
+                                        <span class="tag yellow">SEBUTAN PRESET</span>
+                                        <span class="tag dark">${item.source.toUpperCase()}</span>
+                                    </div>
+                                    <div class="preset-sub">Cek manual di komen/bio</div>
+                                </div>
+                            </div>
+                            <div class="link-box" style="font-family: 'Inter', sans-serif; color: #fff;">"${item.text}"</div>
                         `;
                         container.appendChild(card);
                     });
