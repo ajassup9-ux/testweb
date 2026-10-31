@@ -3,980 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AM Preset Finder</title>
+    <title>AM Preset Finder - Real</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0b0c10;
-            --surface: #141518;
-            --surface-hover: #1f2024;
-            --primary: #00fa7e;
-            --primary-dim: rgba(0, 250, 126, 0.1);
-            --text: #ffffff;
-            --text-muted: #8a8d93;
-            --border: #26272b;
+            --bg: #0d0d0f; --surface: #1a1a1d; --primary: #00fa7e;
+            --primary-dim: rgba(0, 250, 126, 0.15); --text: #ffffff;
+            --text-muted: #8a8d93; --border: #2a2a2d;
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 10; }
+        .logo-area { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; }
+        .logo-icon { width: 32px; height: 32px; border: 2px solid var(--text-muted); border-radius: 8px; display: flex; justify-content: center; align-items: center; }
+        .logo-icon svg { width: 20px; height: 20px; fill: var(--primary); }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-        }
+        main { flex: 1; padding: 20px; max-width: 600px; margin: 0 auto; width: 100%; }
+        .search-container { display: flex; gap: 12px; margin-bottom: 16px; }
+        .input-wrapper { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; padding: 0 16px; }
+        .input-wrapper svg { width: 18px; height: 18px; stroke: var(--text-muted); fill: none; stroke-width: 2; margin-right: 12px; }
+        .input-wrapper input { background: none; border: none; color: var(--text); width: 100%; padding: 14px 0; font-size: 14px; outline: none; }
+        .btn-primary { background: var(--primary); color: #000; border: none; border-radius: 8px; padding: 0 24px; font-weight: 700; font-size: 14px; cursor: pointer; }
 
-        /* Header */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
-            background: var(--bg);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
+        .pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 24px; }
+        .pill { background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); padding: 8px 16px; border-radius: 20px; font-size: 12px; white-space: nowrap; }
 
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 700;
-            font-size: 18px;
-        }
-
-        .logo-icon {
-            width: 32px;
-            height: 32px;
-            border: 2px solid var(--text-muted);
-            border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-
-        .logo-icon svg {
-            width: 20px;
-            height: 20px;
-            fill: var(--primary);
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            color: var(--text-muted);
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .menu-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-        }
-
-        /* Main Content */
-        main {
-            flex: 1;
-            padding: 20px;
-            max-width: 600px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .subtitle {
-            color: var(--text-muted);
-            font-size: 13px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .section-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 24px;
-            font-weight: 800;
-            margin-bottom: 24px;
-            letter-spacing: -0.5px;
-        }
-
-        .section-title span {
-            color: var(--primary);
-            font-size: 14px;
-            font-weight: 600;
-            letter-spacing: 2px;
-        }
-
-        /* Tabs */
-        .tabs {
-            display: flex;
-            gap: 24px;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 20px;
-        }
-
-        .tab {
-            padding: 12px 0;
-            color: var(--text-muted);
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            position: relative;
-            transition: color 0.2s;
-        }
-
-        .tab.active {
-            color: var(--text);
-        }
-
-        .tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: var(--primary);
-        }
-
-        .tab svg {
-            width: 18px;
-            height: 18px;
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 2;
-        }
-
-        .tab-desc {
-            color: var(--text-muted);
-            font-size: 13px;
-            line-height: 1.5;
-            margin-bottom: 20px;
-        }
-
-        /* Input Area */
-        .search-container {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .input-wrapper {
-            flex: 1;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            padding: 0 16px;
-        }
-
-        .input-wrapper svg {
-            width: 18px;
-            height: 18px;
-            stroke: var(--text-muted);
-            fill: none;
-            stroke-width: 2;
-            margin-right: 12px;
-        }
-
-        .input-wrapper input {
-            background: none;
-            border: none;
-            color: var(--text);
-            width: 100%;
-            padding: 16px 0;
-            font-size: 14px;
-            outline: none;
-        }
-
-        .input-wrapper input::placeholder {
-            color: var(--text-muted);
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            padding: 0 24px;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .btn-primary:active {
-            opacity: 0.8;
-        }
-
-        /* Pills */
-        .pills {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            scrollbar-width: none;
-        }
-
-        .pills::-webkit-scrollbar { display: none; }
-
-        .pill {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            white-space: nowrap;
-        }
-
-        /* Cards */
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .card-title {
-            color: var(--primary);
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .card-title::before {
-            content: '';
-            display: block;
-            width: 20px;
-            height: 2px;
-            background: var(--primary);
-        }
-
-        .step-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .step-item {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            font-size: 14px;
-            color: #d1d5db;
-        }
-
-        .step-num {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 12px;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-
-        /* Loading State */
-        .loading-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 0;
-            gap: 16px;
-            display: none;
-        }
-
+        .loading-state { display: none; flex-direction: column; align-items: center; padding: 40px 0; gap: 16px; }
         .loading-state.active { display: flex; }
-        .steps-state.hidden { display: none; }
-
-        .spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid rgba(0, 250, 126, 0.2);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
+        .spinner { width: 32px; height: 32px; border: 3px solid rgba(0, 250, 126, 0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Result State */
-        .result-state {
-            display: none;
-            flex-direction: column;
-            gap: 16px;
-        }
-
+        .result-state { display: none; flex-direction: column; gap: 16px; }
         .result-state.active { display: flex; }
+        .video-box { width: 100%; aspect-ratio: 9/16; max-height: 500px; background: #222; border-radius: 8px; background-size: cover; background-position: center; }
+        .caption-text { font-size: 13px; color: #e0e0e0; line-height: 1.5; word-wrap: break-word; }
 
-        .video-preview {
-            width: 100%;
-            height: 400px;
-            background: #222;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            background-image: url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1000&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
-            position: relative;
-        }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; margin: 8px 0; }
+        .stat-item { display: flex; flex-direction: column; }
+        .stat-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+        .stat-value { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .avatar-sm { width: 20px; height: 20px; border-radius: 50%; background-size: cover; background-position: center; }
 
-        .metadata {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: var(--text-muted);
-        }
+        .audio-bar { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+        .audio-info { display: flex; align-items: center; gap: 12px; }
+        .audio-thumb { width: 44px; height: 44px; border-radius: 50%; background-size: cover; background-position: center; position: relative; }
+        .audio-title { font-size: 14px; font-weight: 600; }
+        .audio-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
-        .metadata strong {
-            color: var(--text);
-            font-size: 14px;
-            display: block;
-            margin-bottom: 4px;
-        }
+        .preset-section-title { display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 800; margin-top: 10px; margin-bottom: 16px; }
+        .preset-section-title span { color: var(--primary); font-size: 14px; letter-spacing: 2px; }
+        .badge-count { background: #123d24; color: var(--primary); width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: 700; }
 
-        .audio-bar {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 10px;
-        }
-
-        .audio-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #2a2a2a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-        }
-
-        .preset-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-        }
-
-        .preset-header {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-
-        .preset-thumb {
-            width: 60px;
-            height: 60px;
-            background: #444;
-            border-radius: 6px;
-            background-image: url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=200&auto=format&fit=crop');
-            background-size: cover;
-        }
-
-        .preset-info h4 {
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-
-        .tag {
-            display: inline-block;
-            background: var(--primary-dim);
-            color: var(--primary);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .tag.dark {
-            background: #2a2a2a;
-            color: var(--text-muted);
-        }
-
-        .link-box {
-            background: #000;
-            padding: 12px;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 12px;
-            color: var(--text-muted);
-            word-break: break-all;
-            margin-bottom: 16px;
-            border: 1px solid #333;
-        }
-
-        .action-btns {
-            display: flex;
-            gap: 12px;
-        }
-
-        .btn-outline {
-            background: none;
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px 16px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            flex: 1;
-            justify-content: center;
-        }
-
-        /* Footer */
-        footer {
-            border-top: 1px solid var(--border);
-            padding: 30px 20px;
-            margin-top: 40px;
-        }
-
-        .footer-brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
+        .preset-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+        .preset-header { display: flex; gap: 16px; margin-bottom: 16px; }
+        .preset-thumb { width: 70px; height: 70px; background: #444; border-radius: 6px; background-size: cover; background-position: center; flex-shrink: 0; }
+        .preset-info h4 { font-size: 15px; margin-bottom: 6px; font-weight: 700; }
+        .tag-group { display: flex; gap: 6px; margin-bottom: 6px; }
+        .tag { background: rgba(0, 250, 126, 0.1); color: var(--primary); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; border: 1px solid rgba(0, 250, 126, 0.3); }
+        .tag.dark { background: #2a2a2d; color: #a0a0a0; border-color: transparent; }
+        .link-box { background: #000; padding: 14px; border-radius: 8px; font-family: monospace; font-size: 12px; color: #a0a0a0; word-break: break-all; margin-bottom: 16px; border: 1px solid #222; }
+        .action-btns { display: flex; gap: 12px; }
+        .btn-action { flex: 1; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer; text-decoration: none; }
+        .btn-action.primary { background: var(--primary); color: #000; border: none; }
+        .btn-action.outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
         
-        .footer-brand .logo-icon {
-            width: 24px; height: 24px;
-        }
-        .footer-brand .logo-icon svg { width: 14px; height: 14px; }
-
-        .footer-desc {
-            font-size: 12px;
-            color: var(--text-muted);
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .social-links {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-
-        .social-btn {
-            width: 36px;
-            height: 36px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--text-muted);
-            text-decoration: none;
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 40px;
-            margin-bottom: 30px;
-        }
-
-        .footer-col h4 {
-            color: var(--primary);
-            font-size: 12px;
-            margin-bottom: 12px;
-            letter-spacing: 1px;
-        }
-
-        .footer-col a {
-            display: block;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 13px;
-            margin-bottom: 8px;
-        }
-
-        .copyright {
-            font-size: 11px;
-            color: var(--text-muted);
-            border-top: 1px solid var(--border);
-            padding-top: 20px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(4px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            padding: 20px;
-        }
-
-        .modal-overlay.active { display: flex; }
-
-        .modal-box {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
-            width: 100%;
-            max-width: 400px;
-            position: relative;
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        .modal-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .modal-desc {
-            font-size: 13px;
-            color: var(--text-muted);
-            line-height: 1.6;
-            margin-bottom: 24px;
-        }
-
-        .btn-modal-primary {
-            width: 100%;
-            background: var(--primary);
-            color: #000;
-            border: 2px solid #fff;
-            padding: 14px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 15px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-modal-secondary {
-            width: 100%;
-            background: transparent;
-            color: var(--text);
-            border: 1px solid var(--border);
-            padding: 14px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-        }
-
-        /* Toast */
-        .toast {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            left: 20px;
-            background: #0a2e1f;
-            border: 1px solid #114b33;
-            border-radius: 8px;
-            padding: 12px 16px;
-            display: none;
-            align-items: center;
-            gap: 12px;
-            z-index: 50;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            animation: slideDown 0.3s ease-out;
-        }
-
-        .toast.active { display: flex; }
-        .toast-icon {
-            width: 24px; height: 24px;
-            background: #25D366;
-            border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .toast-icon svg { width: 14px; height: 14px; fill: #fff; }
+        .error-msg { background: #ff3333; color: white; padding: 12px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; display: none; }
         
-        .toast-content { flex: 1; }
-        .toast-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 2px;}
-        .toast-desc { font-size: 11px; color: #a3c9b8; }
-        .toast-close { background: none; border: none; color: #a3c9b8; font-size: 16px; cursor: pointer;}
-
-        @keyframes slideDown {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .input-wrapper .clear-btn {
-            background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; display: none;
-        }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <!-- Toast Notification -->
-    <div class="toast" id="waToast">
-        <div class="toast-icon">
-            <svg viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zM12 2C6.477 2 2 6.477 2 12c0 1.891.525 3.659 1.436 5.169l-1.281 4.672 4.787-1.263c1.456.797 3.135 1.26 4.924 1.26 5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.33c-1.628 0-3.15-.454-4.45-1.247l-.319-.19-3.31.874.887-3.229-.208-.331C3.627 14.873 3.08 13.497 3.08 12c0-4.916 3.999-8.915 8.92-8.915 4.916 0 8.915 3.999 8.915 8.915 0 4.921-3.999 8.33-8.915 8.33z"/></svg>
-        </div>
-        <div class="toast-content">
-            <div class="toast-title">Join saluran wa AM Finder</div>
-            <div class="toast-desc">Agar mendapatkan info update terbaru</div>
-        </div>
-        <button class="toast-close" onclick="closeToast()">×</button>
-    </div>
-
-    <!-- Header -->
     <header>
         <div class="logo-area">
-            <div class="logo-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
-            </div>
+            <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg></div>
             AM Preset Finder
-        </div>
-        <div class="header-actions">
-            ID <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            <button class="menu-btn">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-            </button>
         </div>
     </header>
 
     <main>
-        <div class="subtitle">
-            Temukan preset Alight Motion dari link TikTok atau YouTube mana pun
-        </div>
-
-        <div class="section-title">
-            <span>======///</span> Cari link preset
-        </div>
-
-        <!-- Tabs -->
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('url')">
-                <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                URL Video
+        <div id="searchView">
+            <div style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">
+                Masukkan link video TikTok untuk mencari link preset secara Real-Time.
             </div>
-            <div class="tab" onclick="switchTab('keyword')">
-                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                Cari Preset
+            <div class="error-msg" id="errMsg"></div>
+
+            <div class="search-container">
+                <div class="input-wrapper">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="searchInput" placeholder="https://vt.tiktok.com/...">
+                </div>
+                <button class="btn-primary" onclick="handleSearch()">Cari</button>
             </div>
-        </div>
 
-        <div class="tab-desc" id="tabDesc">
-            Masukkan link video TikTok atau YouTube untuk mencari link preset di deskripsi, bio, komentar, dan balasannya.
-        </div>
-
-        <!-- Search Form -->
-        <div class="search-container">
-            <div class="input-wrapper">
-                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="searchInput" placeholder="https://youtu.be/...">
-                <button class="clear-btn" id="clearBtn" onclick="clearInput()">×</button>
-            </div>
-            <button class="btn-primary" onclick="handleSearch()">Cari</button>
-        </div>
-
-        <!-- Pills (History) -->
-        <div class="pills">
-            <div class="pill">https://youtu.be/0tDyPJ4N-JI?si=iX7j_GiCyXemf...</div>
-            <div class="pill">https://vt.tiktok.com/ZSgvc5kMx/</div>
-        </div>
-
-        <!-- Steps Card (Default View) -->
-        <div class="card steps-state" id="stepsCard">
-            <div class="card-title">LANGKAH-LANGKAH</div>
-            <div class="step-list">
-                <div class="step-item">
-                    <div class="step-num">1</div>
-                    <div>Tempel link TikTok atau YouTube</div>
-                </div>
-                <div class="step-item">
-                    <div class="step-num">2</div>
-                    <div>AM Preset Finder memindai video, bio, dan komentarnya</div>
-                </div>
-                <div class="step-item">
-                    <div class="step-num">3</div>
-                    <div>Link preset diambil otomatis</div>
-                </div>
-                <div class="step-item">
-                    <div class="step-num">4</div>
-                    <div>Salin preset yang kamu butuhkan</div>
-                </div>
+            <div class="pills">
+                <div class="pill">Tempel link TikTok lu di sini</div>
             </div>
         </div>
 
-        <!-- Loading State -->
         <div class="loading-state" id="loadingState">
-            <div class="card" style="width: 100%; display: flex; justify-content: center; align-items: center; padding: 30px; gap: 12px;">
-                <div class="spinner"></div>
-                <div style="font-weight: 600;">Mencari link preset...</div>
-            </div>
+            <div class="spinner"></div>
+            <div style="font-weight: 600;">Memindai TikTok (Real)...</div>
         </div>
 
-        <!-- Result State -->
         <div class="result-state" id="resultState">
-            <div class="video-preview"></div>
-            
-            <div class="metadata">
-                <div>
-                    <strong>@yackiecuy</strong>
-                    <span>627.1K</span>
+            <div class="video-box" id="resVideoBox"></div>
+            <div class="caption-text" id="resDesc"></div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-label">AKUN</span>
+                    <div class="stat-value">
+                        <div class="avatar-sm" id="resAvatar"></div> <span id="resAuthor">@...</span>
+                    </div>
                 </div>
-                <div style="text-align: right;">
-                    <strong>200</strong>
-                    <span>Komentar</span>
+                <div class="stat-item">
+                    <span class="stat-label">KOMENTAR</span>
+                    <span class="stat-value" id="resComments">0</span>
                 </div>
-                <div style="text-align: right;">
-                    <strong>67.5K</strong>
-                    <span>Suka</span>
+                <div class="stat-item">
+                    <span class="stat-label">DITONTON</span>
+                    <span class="stat-value" id="resViews">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">SUKA</span>
+                    <span class="stat-value" id="resLikes">0</span>
                 </div>
             </div>
 
             <div class="audio-bar">
-                <div class="audio-icon">🎵</div>
-                <div>
-                    <div style="font-size: 13px; font-weight: 600;">original sound - yackiecuy</div>
-                    <div style="font-size: 11px; color: var(--text-muted);">Yäckie! - am prem di bio</div>
+                <div class="audio-info">
+                    <div class="audio-thumb" id="resMusicCover"></div>
+                    <div>
+                        <div class="audio-title" id="resMusicTitle">-</div>
+                        <div class="audio-subtitle" id="resMusicAuthor">-</div>
+                    </div>
                 </div>
             </div>
 
-            <div style="margin-top: 20px;">
-                <div class="section-title" style="font-size: 18px; margin-bottom: 12px;">
-                    <span>======///</span> Link preset <span style="background: #1a3a2a; color: var(--primary); padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 8px;">1</span>
+            <div>
+                <div class="preset-section-title">
+                    <span>======///</span> Link preset <div class="badge-count" id="resPresetCount">0</div>
                 </div>
-                
-                <div class="preset-card">
-                    <div class="preset-header">
-                        <div class="preset-thumb"></div>
-                        <div class="preset-info">
-                            <h4>Reeyn #214 | 1:1 [+1]</h4>
-                            <span class="tag">5MB</span>
-                            <span class="tag dark">DARI AKUN INI</span>
-                            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">@yackiecuy (balasan)</div>
-                        </div>
-                    </div>
-                    <div class="link-box" id="presetLink">https://alightcreative.com/am/share/u/QVnykNf7s7hF3dvg4I6oD1MYn0F3/p/GsdeJMEqes-c30d6c479d5e17ac</div>
-                    <div class="action-btns">
-                        <button class="btn-primary" style="flex: 1; padding: 10px; display: flex; justify-content: center; align-items: center; gap: 8px;" onclick="window.open('https://alightcreative.com', '_blank')">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                            Buka
-                        </button>
-                        <button class="btn-outline" onclick="copyLink()" id="copyBtn">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                            Salin
-                        </button>
-                    </div>
-                </div>
+                <div id="presetContainer"></div>
             </div>
         </div>
-
     </main>
 
-    <!-- Footer -->
-    <footer>
-        <div class="footer-brand">
-            <div class="logo-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
-            </div>
-            AM Preset Finder
-        </div>
-        <div class="footer-desc">
-            Tempel link TikTok atau YouTube dan dapatkan link preset Alight Motion yang tersembunyi di deskripsi, bio, komentar, dan balasannya. Tanpa akun, tanpa iklan, tanpa pelacakan.
-        </div>
-        <div class="social-links">
-            <a href="#" class="social-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
-            </a>
-            <a href="#" class="social-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-            </a>
-        </div>
-        <div class="footer-links">
-            <div class="footer-col">
-                <h4>DUKUNGAN</h4>
-                <a href="#">Sociabuzz</a>
-                <a href="#">Saluran Whatsapp</a>
-            </div>
-            <div class="footer-col">
-                <h4>LEGAL</h4>
-                <a href="#">Ketentuan Layanan</a>
-                <a href="#">Kebijakan Privasi</a>
-            </div>
-        </div>
-        <div class="copyright">
-            <span>© 2026 Givy. Hak cipta dilindungi.</span>
-            <span style="text-align: right; max-width: 50%;">Tidak berafiliasi dengan TikTok, YouTube, maupun Alight Motion.</span>
-        </div>
-    </footer>
-
-    <!-- Modal -->
-    <div class="modal-overlay" id="supportModal">
-        <div class="modal-box">
-            <button class="modal-close" onclick="closeModal()">×</button>
-            <div class="modal-title">❤️ Suka AM Finder?</div>
-            <div class="modal-desc">
-                Kalau AM Finder membantu kamu menemukan preset dengan cepat, kamu bisa ikut mendukung pengembangnya agar web ini tetap aktif dan terus bisa digunakan.
-            </div>
-            <button class="btn-modal-primary">
-                ☕ Beri Dukungan
-            </button>
-            <button class="btn-modal-secondary" onclick="closeModal()">
-                Nanti aja
-            </button>
-        </div>
-    </div>
-
     <script>
-        // Tab Switching Logic
-        const tabDesc = document.getElementById('tabDesc');
-        const inputField = document.getElementById('searchInput');
-        const clearBtn = document.getElementById('clearBtn');
-        const tabs = document.querySelectorAll('.tab');
+        // GANTI URL INI KALAU BACKEND LU UDAH DI-DEPLOY (misal ke vercel/render)
+        // Kalau jalan di laptop lokal, biarin localhost:3000
+        const API_BASE_URL = 'http://localhost:3000';
 
-        function switchTab(type) {
-            tabs.forEach(t => t.classList.remove('active'));
-            if (type === 'url') {
-                tabs[0].classList.add('active');
-                tabDesc.innerHTML = 'Masukkan link video TikTok atau YouTube untuk mencari link preset di deskripsi, bio, komentar, dan balasannya.';
-                inputField.placeholder = 'https://youtu.be/...';
-            } else {
-                tabs[1].classList.add('active');
-                tabDesc.innerHTML = 'Cari pakai nama lagu atau kata kunci, lalu pilih video untuk mencari link preset di deskripsi, bio, komentar, dan balasannya.';
-                inputField.placeholder = 'Cari nama lagu atau kata kunci...';
-            }
-            resetView();
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
         }
 
-        // Input Clear Button Logic
-        inputField.addEventListener('input', function() {
-            if (this.value.length > 0) {
-                clearBtn.style.display = 'block';
-            } else {
-                clearBtn.style.display = 'none';
-            }
-        });
-
-        function clearInput() {
-            inputField.value = '';
-            clearBtn.style.display = 'none';
-            resetView();
-        }
-
-        // Reset View
-        function resetView() {
-            document.getElementById('stepsCard').classList.remove('hidden');
-            document.getElementById('loadingState').classList.remove('active');
-            document.getElementById('resultState').classList.remove('active');
-            closeModal();
-        }
-
-        // Search Simulation
-        function handleSearch() {
-            const input = inputField.value.trim();
+        async function handleSearch() {
+            const input = document.getElementById('searchInput').value.trim();
+            const errMsg = document.getElementById('errMsg');
+            
             if (!input) {
-                alert('Isi link atau kata kunci dulu, gng.');
+                errMsg.innerText = 'Masukin link TikTok dulu, gng.';
+                errMsg.style.display = 'block';
                 return;
             }
-            
-            // Hide steps, show loading
-            document.getElementById('stepsCard').classList.add('hidden');
+            errMsg.style.display = 'none';
+
+            document.getElementById('searchView').classList.add('hidden');
             document.getElementById('loadingState').classList.add('active');
             document.getElementById('resultState').classList.remove('active');
 
-            // Show Toast
-            setTimeout(() => {
-                document.getElementById('waToast').classList.add('active');
-            }, 1000);
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/search?url=${encodeURIComponent(input)}`);
+                const data = await response.json();
 
-            // Simulate network request
-            setTimeout(() => {
+                if (!response.ok) throw new Error(data.error || 'Gagal ambil data');
+
+                // Populate UI
+                document.getElementById('resAuthor').innerText = '@' + data.author.username;
+                document.getElementById('resAvatar').style.backgroundImage = `url(${data.author.avatar})`;
+                document.getElementById('resComments').innerText = formatNumber(data.stats.commentCount);
+                document.getElementById('resViews').innerText = formatNumber(data.stats.playCount);
+                document.getElementById('resLikes').innerText = formatNumber(data.stats.diggCount);
+                
+                document.getElementById('resDesc').innerText = data.desc;
+                document.getElementById('resMusicTitle').innerText = data.music.title;
+                document.getElementById('resMusicAuthor').innerText = data.music.author;
+                document.getElementById('resMusicCover').style.backgroundImage = `url(${data.music.cover})`;
+                
+                // Fallback video background (karena thumbnail video gak dikasih sama API, pake bg default)
+                document.getElementById('resVideoBox').style.backgroundImage = `url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop')`;
+
+                // Render Presets
+                const container = document.getElementById('presetContainer');
+                const countBadge = document.getElementById('resPresetCount');
+                container.innerHTML = '';
+                countBadge.innerText = data.presets.length;
+
+                if (data.presets.length === 0) {
+                    container.innerHTML = `<div style="color: var(--text-muted); font-size: 14px; padding: 10px;">Gak ada link Alight Motion di deskripsi video ini, gng. Coba cek komen manual.</div>`;
+                } else {
+                    data.presets.forEach((preset, i) => {
+                        const card = document.createElement('div');
+                        card.className = 'preset-card';
+                        card.innerHTML = `
+                            <div class="preset-header">
+                                <div class="preset-thumb" style="background-image: url('${data.music.cover}')"></div>
+                                <div class="preset-info">
+                                    <h4>${preset.title}</h4>
+                                    <div class="tag-group">
+                                        <span class="tag">${preset.size}</span>
+                                        <span class="tag dark">${preset.source.toUpperCase()}</span>
+                                    </div>
+                                    <div class="preset-sub">@${data.author.username}</div>
+                                </div>
+                            </div>
+                            <div class="link-box">${preset.link}</div>
+                            <div class="action-btns">
+                                <a href="${preset.link}" target="_blank" class="btn-action primary">
+                                    Buka
+                                </a>
+                                <button class="btn-action outline" onclick="navigator.clipboard.writeText('${preset.link}'); this.innerText='✅ Tersalin'; setTimeout(()=>this.innerText='Salin', 2000)">
+                                    Salin
+                                </button>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    });
+                }
+
                 document.getElementById('loadingState').classList.remove('active');
                 document.getElementById('resultState').classList.add('active');
-                
-                // Show Modal after result loads
-                setTimeout(() => {
-                    document.getElementById('supportModal').classList.add('active');
-                }, 1500);
 
-            }, 2500);
-        }
-
-        // Modal Logic
-        function closeModal() {
-            document.getElementById('supportModal').classList.remove('active');
-        }
-
-        // Toast Logic
-        function closeToast() {
-            document.getElementById('waToast').classList.remove('active');
-        }
-
-        // Copy Logic
-        function copyLink() {
-            const linkText = document.getElementById('presetLink').innerText;
-            navigator.clipboard.writeText(linkText).then(() => {
-                const copyBtn = document.getElementById('copyBtn');
-                const originalHTML = copyBtn.innerHTML;
-                copyBtn.innerHTML = '✅ Tersalin!';
-                copyBtn.style.color = 'var(--primary)';
-                copyBtn.style.borderColor = 'var(--primary)';
-                
-                setTimeout(() => {
-                    copyBtn.innerHTML = originalHTML;
-                    copyBtn.style.color = '';
-                    copyBtn.style.borderColor = '';
-                }, 2000);
-            });
+            } catch (err) {
+                document.getElementById('loadingState').classList.remove('active');
+                document.getElementById('searchView').classList.remove('hidden');
+                errMsg.innerText = err.message;
+                errMsg.style.display = 'block';
+            }
         }
     </script>
 </body>
