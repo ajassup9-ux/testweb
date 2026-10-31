@@ -2,552 +2,609 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AM Preset Finder</title>
-    <!-- Menggunakan Google Fonts (Inter) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Polling Kelas</title>
     <style>
         :root {
-            --bg-dark: #0a0c10;
-            --bg-card: #14181f;
-            --bg-input: #1a1f26;
-            --primary-green: #00fa9a;
-            --text-main: #e6edf3;
-            --text-muted: #8b949e;
-            --border-color: #30363d;
+            --bg-main: #0b141a;
+            --bg-header: #202c33;
+            --bg-chat: #0b141a;
+            --poll-bg: #005c4b;
+            --text-main: #e9edef;
+            --text-secondary: #8696a0;
+            --border-color: #2f3b43;
+            --btn-green: #00a884;
+            --option-bg: #025144;
         }
 
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background-color: var(--bg-dark);
+            background-color: var(--bg-main);
             color: var(--text-main);
             display: flex;
             justify-content: center;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .container {
+        /* Container HP */
+        #app {
             width: 100%;
-            max-width: 600px; /* Batasan lebar untuk tampilan mobile-like */
-            background-color: var(--bg-dark);
-            min-height: 100vh;
+            max-width: 450px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            background-size: cover;
+            background-blend-mode: overlay;
+            background-color: rgba(11, 20, 26, 0.95); /* Efek gelap */
             position: relative;
         }
 
-        /* ===== HEADER ===== */
+        /* Header */
         header {
+            background-color: var(--bg-header);
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        header h1 {
+            font-size: 18px;
+            font-weight: 500;
+            flex-grow: 1;
+        }
+
+        .back-btn, .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* Area Chat / Polling */
+        main {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Card Polling */
+        .poll-card {
+            background-color: var(--poll-bg);
+            border-radius: 10px;
+            padding: 12px;
+            align-self: flex-end; /* Rata kanan seperti chat */
+            width: 85%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .poll-header h3 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .poll-header p {
+            font-size: 12px;
+            color: #d1d7db;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Opsi Voting */
+        .poll-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.2s;
+        }
+
+        .option-item:hover {
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Custom Radio/Checkbox */
+        .radio-circle {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #8696a0;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            z-index: 2;
+        }
+
+        .option-item.selected .radio-circle {
+            background-color: var(--btn-green);
+            border-color: var(--btn-green);
+        }
+
+        .option-item.selected .radio-circle::after {
+            content: '✓';
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .option-text {
+            flex-grow: 1;
+            font-size: 15px;
+            z-index: 2;
+        }
+
+        .vote-count {
+            font-size: 13px;
+            color: #d1d7db;
+            z-index: 2;
+        }
+
+        /* Bar Persentase (Setelah vote) */
+        .progress-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            z-index: 1;
+            transition: width 0.5s ease;
+        }
+
+        /* Footer Card Polling */
+        .poll-footer {
+            margin-top: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-color);
-            background-color: var(--bg-dark);
-            position: sticky;
-            top: 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 10px;
+            font-size: 12px;
+            color: #d1d7db;
+        }
+
+        .vote-btn {
+            background-color: var(--btn-green);
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: none; /* Sembunyikan awalnya */
+        }
+        
+        .vote-btn.active {
+            display: block;
+        }
+
+        /* FAB (Tombol Buat Polling) */
+        .fab {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 55px;
+            height: 55px;
+            background-color: var(--btn-green);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #111b21;
+            font-size: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
             z-index: 10;
         }
 
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 700;
-            font-size: 18px;
-        }
-
-        .logo-icon {
-            width: 28px;
-            height: 28px;
-            color: var(--primary-green);
-        }
-
-        .menu-area {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        .menu-area svg {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        /* ===== HERO SECTION ===== */
-        .hero {
-            padding: 20px;
-            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-            background-size: 20px 20px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .subtitle {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 24px;
-            line-height: 1.5;
-        }
-
-        .hero-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 24px;
-        }
-
-        .hero-title::before {
-            content: "";
-            display: block;
-            width: 40px;
-            height: 4px;
-            background-color: var(--primary-green);
-            border-radius: 2px;
-        }
-
-        /* Tabs */
-        .tabs {
-            display: flex;
-            gap: 24px;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 16px;
-        }
-
-        .tab {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 0;
-            cursor: pointer;
-            color: var(--text-muted);
-            font-weight: 600;
-            font-size: 15px;
-            position: relative;
-            transition: color 0.3s;
-        }
-
-        .tab.active {
-            color: var(--text-main);
-        }
-
-        .tab.active::after {
-            content: "";
+        /* Modal Buat Polling */
+        .modal {
             position: absolute;
-            bottom: -1px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background-color: var(--primary-green);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-main);
+            z-index: 20;
+            display: none;
+            flex-direction: column;
         }
 
-        .tab svg {
-            width: 18px;
-            height: 18px;
+        .modal.active {
+            display: flex;
         }
 
-        .instruction-text {
-            font-size: 13px;
-            color: var(--text-muted);
-            line-height: 1.5;
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .input-group {
             margin-bottom: 20px;
-            min-height: 40px;
         }
 
-        /* ===== SEARCH SECTION ===== */
-        .search-box {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 12px;
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
         }
 
-        .input-wrapper {
-            flex: 1;
-            position: relative;
-            display: flex;
-            align-items: center;
-            background-color: var(--bg-input);
+        .input-field {
+            width: 100%;
+            background-color: transparent;
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 0 16px;
-            height: 48px;
-        }
-
-        .input-wrapper svg {
-            width: 18px;
-            height: 18px;
-            color: var(--text-muted);
-            margin-right: 12px;
-        }
-
-        .input-wrapper input {
-            flex: 1;
-            background: transparent;
-            border: none;
+            padding: 12px;
             color: var(--text-main);
-            font-size: 14px;
+            font-size: 15px;
             outline: none;
         }
 
-        .input-wrapper input::placeholder {
-            color: var(--text-muted);
+        .input-field:focus {
+            border-color: var(--btn-green);
         }
 
-        .clear-btn {
-            color: var(--text-muted);
-            cursor: pointer;
-            display: none; /* Hanya muncul di tab URL Video */
-        }
-
-        .btn-cari {
-            background-color: var(--primary-green);
-            color: #000;
-            font-weight: 700;
-            font-size: 15px;
-            border: none;
-            border-radius: 8px;
-            padding: 0 24px;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .btn-cari:hover {
-            opacity: 0.8;
-        }
-
-        /* Recent Links (Hanya di Tab URL) */
-        .recent-links {
-            display: none;
-            gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 12px;
-            margin-bottom: 8px;
-            scrollbar-width: none;
-        }
-        
-        .recent-links::-webkit-scrollbar {
-            display: none;
-        }
-
-        .recent-links.active {
+        .setting-row {
             display: flex;
-        }
-
-        .link-pill {
-            background-color: var(--bg-input);
-            border: 1px solid var(--border-color);
-            color: var(--text-muted);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            white-space: nowrap;
-            cursor: pointer;
-        }
-
-        /* ===== STEPS CARD ===== */
-        .steps-card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-
-        .steps-title {
-            color: var(--primary-green);
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
-        }
-
-        .step-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-
-        .step-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .step-num {
-            width: 24px;
-            height: 24px;
-            border: 1px solid var(--primary-green);
-            border-radius: 50%;
-            display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            color: var(--primary-green);
-            font-size: 12px;
-            font-weight: 600;
-            flex-shrink: 0;
-            margin-top: 2px;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 15px;
         }
 
-        .step-text {
-            font-size: 14px;
-            color: var(--text-main);
-            line-height: 1.4;
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
         }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #3b4a54; transition: .4s; border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute; content: "";
+            height: 18px; width: 18px; left: 3px; bottom: 3px;
+            background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--btn-green); }
+        input:checked + .slider:before { transform: translateX(20px); }
 
-        /* ===== FOOTER ===== */
-        footer {
-            border-top: 1px solid var(--border-color);
-            padding: 30px 20px;
+        .submit-btn {
+            background-color: var(--btn-green);
+            color: #111b21;
+            border: none;
+            width: 100%;
+            padding: 15px;
+            border-radius: 24px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
             margin-top: 20px;
         }
-
-        .footer-top {
-            margin-bottom: 30px;
-        }
-
-        .footer-desc {
-            color: var(--text-muted);
-            font-size: 13px;
-            line-height: 1.6;
-            margin: 16px 0 20px 0;
-        }
-
-        .social-icons {
-            display: flex;
-            gap: 12px;
-        }
-
-        .social-icon {
-            width: 36px;
-            height: 36px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-main);
-            text-decoration: none;
-        }
-
-        .footer-links {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .link-col h4 {
-            color: var(--primary-green);
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 16px;
-        }
-
-        .link-col a {
-            display: block;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 13px;
-            margin-bottom: 12px;
-        }
-
-        .link-col a:hover {
-            color: var(--text-main);
-        }
-
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- HEADER -->
+<div id="app">
+    <!-- Header -->
+    <header>
+        <button class="back-btn" id="headerBackBtn" onclick="goBack()">←</button>
+        <h1 id="headerTitle">Grup Kelas</h1>
+        <button class="icon-btn" id="headerCreateBtn" onclick="openCreateModal()">⋮</button>
+    </header>
+
+    <!-- Area Chat -->
+    <main id="pollContainer">
+        <!-- Card Polling akan di-render lewat JS -->
+    </main>
+
+    <!-- FAB (Tombol Tambah Polling) -->
+    <div class="fab" id="fabBtn" onclick="openCreateModal()">+</div>
+
+    <!-- Modal Buat Polling -->
+    <div class="modal" id="createModal">
         <header>
-            <div class="logo-area">
-                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm0-14a6 6 0 1 0 6 6 6 6 0 0 0-6-6zm0 10a4 4 0 1 1 4-4 4 4 0 0 1-4 4zm0-6a2 2 0 1 0 2 2 2 2 0 0 0-2-2z" />
-                </svg>
-                AM Preset Finder
-            </div>
-            <div class="menu-area">
-                <span>ID <svg style="width:12px; height:12px; display:inline-block; vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </div>
+            <button class="back-btn" onclick="closeCreateModal()">←</button>
+            <h1>Buat polling</h1>
         </header>
+        
+        <div class="modal-body">
+            <div class="input-group">
+                <label>Pertanyaan</label>
+                <input type="text" id="pollQuestion" class="input-field" placeholder="Ajukan pertanyaan" maxlength="255">
+            </div>
 
-        <!-- MAIN CONTENT -->
-        <main class="hero">
-            <p class="subtitle">Temukan preset Alight Motion dari link TikTok atau YouTube mana pun</p>
+            <div class="input-group" id="optionsContainer">
+                <label>Pilihan</label>
+                <!-- Input opsi akan ditambahkan lewat JS -->
+            </div>
+
+            <button class="icon-btn" onclick="addOptionInput()" style="color: var(--btn-green); font-size: 15px; margin-bottom: 20px;">+ Tambah pilihan</button>
+
+            <div class="setting-row">
+                <span>Izinkan beberapa jawaban</span>
+                <label class="switch">
+                    <input type="checkbox" id="allowMultiple">
+                    <span class="slider"></span>
+                </label>
+            </div>
             
-            <h1 class="hero-title">Cari link preset</h1>
-
-            <!-- TABS -->
-            <div class="tabs">
-                <div class="tab" id="tab-url" onclick="switchTab('url')">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-                    </svg>
-                    URL Video
-                </div>
-                <div class="tab active" id="tab-search" onclick="switchTab('search')">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    Cari Preset
-                </div>
+            <div class="setting-row">
+                <span>Sembunyikan nama pemilih</span>
+                <label class="switch">
+                    <input type="checkbox" id="hideVoters" checked disabled> <!-- Disabled sementara -->
+                    <span class="slider"></span>
+                </label>
             </div>
 
-            <p class="instruction-text" id="instruction-text">
-                Cari pakai nama lagu atau kata kunci, lalu pilih video untuk mencari link preset di deskripsi, bio, komentar, dan balasannya.
-            </p>
-
-            <!-- INPUT AREA -->
-            <div class="search-box">
-                <div class="input-wrapper">
-                    <svg id="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    <input type="text" id="main-input" placeholder="Cari nama lagu atau kata kunci...">
-                    <svg class="clear-btn" id="clear-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </div>
-                <button class="btn-cari">Cari</button>
-            </div>
-
-            <!-- RECENT LINKS (Khusus URL Tab) -->
-            <div class="recent-links" id="recent-links">
-                <div class="link-pill">https://youtu.be/0tDyPJ4N-JI?si=ix17j_GiCytXemf</div>
-                <div class="link-pill">https://vt.tiktok.com/ZSg9uhB4t/</div>
-            </div>
-
-            <!-- STEPS CARD -->
-            <div class="steps-card">
-                <div class="steps-title">LANGKAH-LANGKAH</div>
-                <div id="steps-container">
-                    <!-- Content injected via JS -->
-                </div>
-            </div>
-        </main>
-
-        <!-- FOOTER -->
-        <footer>
-            <div class="footer-top">
-                <div class="logo-area">
-                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm0-14a6 6 0 1 0 6 6 6 6 0 0 0-6-6zm0 10a4 4 0 1 1 4-4 4 4 0 0 1-4 4zm0-6a2 2 0 1 0 2 2 2 2 0 0 0-2-2z" />
-                    </svg>
-                    AM Preset Finder
-                </div>
-                <p class="footer-desc">
-                    Tempel link TikTok atau YouTube dan dapatkan link preset Alight Motion yang tersembunyi di deskripsi, bio, komentar, dan balasannya. Tanpa akun, tanpa iklan, tanpa pelacakan.
-                </p>
-                <div class="social-icons">
-                    <a href="#" class="social-icon">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
-                    </a>
-                    <a href="#" class="social-icon">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-                    </a>
-                </div>
-            </div>
-
-            <div class="footer-links">
-                <div class="link-col">
-                    <h4>DUKUNGAN</h4>
-                    <a href="#">Sociabuzz</a>
-                    <a href="#">Saluran WhatsApp</a>
-                </div>
-                <div class="link-col">
-                    <h4>LEGAL</h4>
-                    <a href="#">Ketentuan Layanan</a>
-                    <a href="#">Kebijakan Privasi</a>
-                </div>
-            </div>
-        </footer>
+            <button class="submit-btn" onclick="createPoll()">Kirim</button>
+        </div>
     </div>
+</div>
 
-    <!-- JAVASCRIPT LOGIC -->
-    <script>
-        // Data for each tab
-        const tabData = {
-            search: {
-                instruction: "Cari pakai nama lagu atau kata kunci, lalu pilih video untuk mencari link preset di deskripsi, bio, komentar, dan balasannya.",
-                placeholder: "Cari nama lagu atau kata kunci...",
-                icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>`,
-                steps: [
-                    "Ketik nama lagu atau kata kunci",
-                    "Pilih video dari hasil pencarian",
-                    "AM Preset Finder memindai video, bio, dan komentarnya",
-                    "Salin preset yang kamu butuhkan"
-                ]
-            },
-            url: {
-                instruction: "Masukkan link video TikTok atau YouTube untuk mencari link preset di deskripsi, bio, komentar, dan balasannya.",
-                placeholder: "https://youtu.be/0tDyPJ4N-JI?si=ix17j_GiCytXemf",
-                icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>`,
-                steps: [
-                    "Tempel link TikTok atau YouTube",
-                    "AM Preset Finder memindai video, bio, dan komentarnya",
-                    "Link preset diambil otomatis",
-                    "Salin preset yang kamu butuhkan"
-                ]
-            }
-        };
+<script>
+    // State Data
+    let polls = JSON.parse(localStorage.getItem('class_polls')) || [];
+    // Simpan ID polling yang sudah di-vote user ini (biar ga bisa vote 2x)
+    let votedPolls = JSON.parse(localStorage.getItem('voted_polls')) || [];
+    // Simpan pilihan sementara sebelum klik "Kirim suara"
+    let tempSelections = {}; 
 
-        function switchTab(tabName) {
-            // Update active class on tabs
-            document.getElementById('tab-url').classList.remove('active');
-            document.getElementById('tab-search').classList.remove('active');
-            document.getElementById(`tab-${tabName}`).classList.add('active');
+    // Render saat halaman dibuka
+    document.addEventListener('DOMContentLoaded', () => {
+        renderPolls();
+        addOptionInput(); // Tambah 2 opsi default di form
+        addOptionInput();
+    });
 
-            // Update content
-            const data = tabData[tabName];
+    // ================= LOGIC RENDER POLLING =================
+    function renderPolls() {
+        const container = document.getElementById('pollContainer');
+        container.innerHTML = '';
+
+        if (polls.length === 0) {
+            container.innerHTML = '<div style="text-align:center; color:#8696a0; margin-top:50px;">Belum ada polling.<br>Klik tombol + untuk membuat.</div>';
+            return;
+        }
+
+        // Render dari yang terbaru
+        polls.slice().reverse().forEach(poll => {
+            const hasVoted = votedPolls.includes(poll.id);
+            const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
             
-            // Update Instruction Text
-            document.getElementById('instruction-text').innerText = data.instruction;
-            
-            // Update Placeholder & Icon
-            const input = document.getElementById('main-input');
-            input.placeholder = data.placeholder;
-            input.value = ""; // Clear input when switching
-            document.getElementById('input-icon').innerHTML = data.icon;
-            
-            // Show/Hide Recent Links and Clear Button
-            const recentLinks = document.getElementById('recent-links');
-            const clearBtn = document.getElementById('clear-btn');
-            if(tabName === 'url') {
-                recentLinks.classList.add('active');
-                clearBtn.style.display = 'block';
-            } else {
-                recentLinks.classList.remove('active');
-                clearBtn.style.display = 'none';
-            }
+            // Buat Card HTML
+            const card = document.createElement('div');
+            card.className = 'poll-card';
 
-            // Update Steps
-            const stepsContainer = document.getElementById('steps-container');
-            stepsContainer.innerHTML = ''; // Clear existing
-            data.steps.forEach((step, index) => {
-                stepsContainer.innerHTML += `
-                    <div class="step-item">
-                        <div class="step-num">${index + 1}</div>
-                        <div class="step-text">${step}</div>
+            // Header Poll
+            let typeText = poll.allowMultiple ? 'Pilih satu atau lebih' : 'Pilih satu';
+            let headerHTML = `
+                <div class="poll-header">
+                    <h3>${poll.question}</h3>
+                    <p>☑️ ${typeText}</p>
+                </div>
+                <div class="poll-options">
+            `;
+
+            // Render Opsi
+            poll.options.forEach(opt => {
+                let percentage = totalVotes === 0 ? 0 : Math.round((opt.votes / totalVotes) * 100);
+                let selectedClass = '';
+                
+                if (!hasVoted) {
+                    // Cek jika sebelumnya sudah dipilih sementara
+                    if(tempSelections[poll.id] && tempSelections[poll.id].includes(opt.id)) {
+                        selectedClass = 'selected';
+                    }
+                } else {
+                    // Jika sudah vote, tampilkan bar progress
+                    selectedClass = 'voted';
+                }
+
+                let progressBar = hasVoted ? `<div class="progress-bar" style="width: ${percentage}%;"></div>` : '';
+                let voteCountText = hasVoted ? `<span class="vote-count">${opt.votes}</span>` : '';
+
+                headerHTML += `
+                    <div class="option-item ${selectedClass}" onclick="toggleSelection('${poll.id}', '${opt.id}')">
+                        ${progressBar}
+                        <div class="radio-circle"></div>
+                        <div class="option-text">${opt.text}</div>
+                        ${voteCountText}
                     </div>
                 `;
             });
+
+            headerHTML += `</div>`; // Tutup poll-options
+
+            // Footer (Tombol Kirim / Total Suara)
+            let footerHTML = '';
+            if (!hasVoted) {
+                // Cek apakah ada opsi yang dipilih
+                let isSelected = tempSelections[poll.id] && tempSelections[poll.id].length > 0;
+                footerHTML = `
+                    <div class="poll-footer" style="border:none; padding-top:5px; justify-content:flex-end;">
+                        <button class="vote-btn ${isSelected ? 'active' : ''}" onclick="submitVote('${poll.id}')">Kirim suara</button>
+                    </div>
+                `;
+            } else {
+                footerHTML = `
+                    <div class="poll-footer" style="color: #00a884;">
+                        <span>Lihat jumlah suara</span>
+                        <span>${new Date(poll.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} ✓✓</span>
+                    </div>
+                `;
+            }
+
+            card.innerHTML = headerHTML + footerHTML;
+            container.appendChild(card);
+        });
+    }
+
+    // ================= LOGIC PEMILIHAN (SEBELUM KIRIM) =================
+    function toggleSelection(pollId, optionId) {
+        if (votedPolls.includes(pollId)) return; // Jika sudah vote, abaikan klik
+
+        const poll = polls.find(p => p.id === pollId);
+        if (!poll) return;
+
+        if (!tempSelections[pollId]) {
+            tempSelections[pollId] = [];
         }
 
-        // Initialize with 'search' tab data on load
-        window.onload = () => {
-            switchTab('search');
+        let index = tempSelections[pollId].indexOf(optionId);
+
+        if (poll.allowMultiple) {
+            // Jika milih banyak (checkbox)
+            if (index > -1) {
+                tempSelections[pollId].splice(index, 1); // Hapus jika diklik lagi
+            } else {
+                tempSelections[pollId].push(optionId); // Tambah
+            }
+        } else {
+            // Jika milih satu (radio)
+            tempSelections[pollId] = [optionId]; // Timpa dengan pilihan baru
+        }
+
+        renderPolls(); // Render ulang untuk update UI
+    }
+
+    // ================= LOGIC KIRIM SUARA =================
+    function submitVote(pollId) {
+        if (!tempSelections[pollId] || tempSelections[pollId].length === 0) return;
+
+        const pollIndex = polls.findIndex(p => p.id === pollId);
+        if (pollIndex === -1) return;
+
+        // Tambahkan suara ke setiap opsi yang dipilih
+        tempSelections[pollId].forEach(selectedOptId => {
+            const optIndex = polls[pollIndex].options.findIndex(o => o.id === selectedOptId);
+            if (optIndex !== -1) {
+                polls[pollIndex].options[optIndex].votes += 1;
+            }
+        });
+
+        // Tandai sudah vote
+        votedPolls.push(pollId);
+        
+        // Simpan ke LocalStorage
+        localStorage.setItem('class_polls', JSON.stringify(polls));
+        localStorage.setItem('voted_polls', JSON.stringify(votedPolls));
+
+        // Hapus dari tempSelections
+        delete tempSelections[pollId];
+
+        renderPolls(); // Update tampilan
+    }
+
+    // ================= LOGIC BUAT POLLING BARU =================
+    function openCreateModal() {
+        document.getElementById('createModal').classList.add('active');
+        document.getElementById('pollQuestion').value = '';
+        document.getElementById('allowMultiple').checked = true;
+        
+        // Reset input options jadi 2 kosong
+        const container = document.getElementById('optionsContainer');
+        container.innerHTML = '<label>Pilihan</label>';
+        addOptionInput();
+        addOptionInput();
+    }
+
+    function closeCreateModal() {
+        document.getElementById('createModal').classList.remove('active');
+    }
+
+    function addOptionInput() {
+        const container = document.getElementById('optionsContainer');
+        const inputDiv = document.createElement('div');
+        inputDiv.style.marginBottom = '10px';
+        inputDiv.innerHTML = `<input type="text" class="input-field option-input" placeholder="+ Tambah" maxlength="100">`;
+        container.appendChild(inputDiv);
+    }
+
+    function createPoll() {
+        const question = document.getElementById('pollQuestion').value.trim();
+        const allowMultiple = document.getElementById('allowMultiple').checked;
+        const optionInputs = document.querySelectorAll('.option-input');
+        
+        // Ambil nilai opsi yang tidak kosong
+        let options = [];
+        optionInputs.forEach(input => {
+            if (input.value.trim() !== '') {
+                options.push({
+                    id: 'opt_' + Math.random().toString(36).substr(2, 9),
+                    text: input.value.trim(),
+                    votes: 0
+                });
+            }
+        });
+
+        // Validasi
+        if (question === '') {
+            alert('Pertanyaan tidak boleh kosong!');
+            return;
+        }
+        if (options.length < 2) {
+            alert('Minimal isi 2 pilihan!');
+            return;
+        }
+
+        // Buat objek poll baru
+        const newPoll = {
+            id: 'poll_' + Date.now().toString(),
+            question: question,
+            allowMultiple: allowMultiple,
+            options: options,
+            date: Date.now()
         };
-    </script>
+
+        // Simpan
+        polls.push(newPoll);
+        localStorage.setItem('class_polls', JSON.stringify(polls));
+
+        // Tutup modal & render ulang
+        closeCreateModal();
+        renderPolls();
+    }
+
+    // Kembali ke menu utama dari modal
+    function goBack() {
+        // Fungsi dummy untuk header utama (karena cuma 1 halaman)
+        // Bisa diarahkan ke link lain jika ada
+        alert("Ini adalah halaman utama grup kelas.");
+    }
+</script>
+
 </body>
 </html>
