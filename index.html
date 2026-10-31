@@ -18,65 +18,35 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ---------- AURORA BACKGROUND ---------- */
-  .aurora {
-    position: fixed; inset: 0;
-    overflow: hidden;
-    z-index: 0;
-    pointer-events: none;
-  }
+  .aurora { position: fixed; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; }
   .blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(90px);
-    opacity: 0.75;
-    mix-blend-mode: screen;
-    animation: blobMove 24s ease-in-out infinite;
+    position: absolute; border-radius: 50%; filter: blur(90px);
+    opacity: 0.75; mix-blend-mode: screen; animation: blobMove 24s ease-in-out infinite;
   }
   .b1 { width: 520px; height: 520px; background: #ff9ec4; top: -12%; left: -12%; }
   .b2 { width: 620px; height: 620px; background: #a78bfa; bottom: -25%; right: -12%; animation-delay: -8s; }
   .b3 { width: 480px; height: 480px; background: #7dd3fc; top: 28%; left: 42%; animation-delay: -16s; }
-
   @keyframes blobMove {
     0%, 100% { transform: translate(0, 0) scale(1); }
     33%      { transform: translate(90px, -70px) scale(1.18); }
     66%      { transform: translate(-70px, 90px) scale(0.9); }
   }
 
-  /* ---------- CANVAS 3D ---------- */
-  #scene {
-    position: fixed; inset: 0;
-    width: 100%; height: 100%;
-    z-index: 1;
-    pointer-events: none;
-  }
+  #scene { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
 
-  /* ---------- UI OVERLAY ---------- */
   .ui {
-    position: fixed; inset: 0;
-    z-index: 5;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    padding: 48px 20px 56px;
-    text-align: center;
-    pointer-events: none;
+    position: fixed; inset: 0; z-index: 5;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    padding: 48px 20px 56px; text-align: center; pointer-events: none;
   }
 
   .title {
     font-family: 'Great Vibes', cursive;
-    font-size: clamp(3rem, 12vw, 8.5rem);
-    font-weight: 400;
-    line-height: 1;
+    font-size: clamp(3rem, 12vw, 8.5rem); font-weight: 400; line-height: 1;
     background: linear-gradient(135deg, #ff4d8f 0%, #b565e8 50%, #4d9fff 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: #ff4d8f;
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #ff4d8f;
     filter: drop-shadow(0 6px 30px rgba(255, 100, 160, 0.45));
-    animation: titleFloat 5s ease-in-out infinite;
-    letter-spacing: 2px;
+    animation: titleFloat 5s ease-in-out infinite; letter-spacing: 2px;
   }
   @keyframes titleFloat {
     0%, 100% { transform: translateY(0) rotate(-0.5deg); }
@@ -84,14 +54,9 @@
   }
 
   .sub {
-    margin-top: 12px;
-    font-size: clamp(0.75rem, 2vw, 1rem);
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    color: #8b5a8b;
-    font-weight: 600;
-    opacity: 0.85;
-    animation: fadeUp 1.8s ease 0.4s both;
+    margin-top: 12px; font-size: clamp(0.75rem, 2vw, 1rem);
+    letter-spacing: 6px; text-transform: uppercase; color: #8b5a8b;
+    font-weight: 600; opacity: 0.85; animation: fadeUp 1.8s ease 0.4s both;
   }
 
   .card {
@@ -100,75 +65,56 @@
     backdrop-filter: blur(22px) saturate(180%);
     -webkit-backdrop-filter: blur(22px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.7);
-    border-radius: 26px;
-    padding: 22px 30px;
-    max-width: 400px;
-    width: 100%;
-    box-shadow:
-      0 20px 60px rgba(180, 100, 180, 0.22),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    border-radius: 26px; padding: 22px 30px; max-width: 400px; width: 100%;
+    box-shadow: 0 20px 60px rgba(180, 100, 180, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.9);
     animation: fadeUp 1.8s ease 0.7s both;
   }
 
-  .card p {
-    font-size: clamp(0.9rem, 2.2vw, 1rem);
-    line-height: 1.7;
-    color: #4a2b4a;
-    font-weight: 500;
+  .card p { font-size: clamp(0.9rem, 2.2vw, 1rem); line-height: 1.7; color: #4a2b4a; font-weight: 500; }
+
+  .stream-links {
+    margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
   }
+  .stream-links a {
+    font-size: 0.78rem; font-weight: 700; text-decoration: none;
+    padding: 7px 14px; border-radius: 999px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    color: #6a3d6a; transition: transform 0.2s ease, background 0.2s ease;
+  }
+  .stream-links a:hover { transform: translateY(-2px); background: #fff; }
 
   .btn {
-    margin-top: 16px;
-    padding: 12px 30px;
-    font-family: inherit;
-    font-size: 0.95rem;
-    font-weight: 700;
-    letter-spacing: 0.6px;
-    color: #fff;
-    background: linear-gradient(135deg, #ff6ea9, #b565e8);
-    border: none;
-    border-radius: 999px;
-    cursor: pointer;
-    box-shadow: 0 8px 26px rgba(255, 110, 169, 0.45);
+    margin-top: 16px; padding: 12px 30px; font-family: inherit;
+    font-size: 0.95rem; font-weight: 700; letter-spacing: 0.6px; color: #fff;
+    background: linear-gradient(135deg, #ff6ea9, #b565e8); border: none; border-radius: 999px;
+    cursor: pointer; box-shadow: 0 8px 26px rgba(255, 110, 169, 0.45);
     transition: transform 0.2s ease, box-shadow 0.25s ease;
   }
   .btn:hover  { transform: translateY(-2px); box-shadow: 0 12px 34px rgba(255, 110, 169, 0.6); }
   .btn:active { transform: scale(0.96); }
 
-  /* ---------- TOMBOL MUSIK ---------- */
   .music-btn {
-    position: fixed;
-    bottom: 26px;
-    right: 26px;
-    z-index: 20;
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
+    position: fixed; bottom: 26px; right: 26px; z-index: 20;
+    width: 58px; height: 58px; border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.75);
     background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    font-size: 1.4rem;
-    cursor: pointer;
+    font-size: 1.4rem; cursor: pointer;
     box-shadow: 0 10px 30px rgba(180, 100, 180, 0.3);
     transition: transform 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
   }
   .music-btn:hover  { transform: scale(1.1); }
   .music-btn:active { transform: scale(0.94); }
   .music-btn.playing { animation: pulse 1.4s ease-in-out infinite; }
-
   @keyframes pulse {
     0%, 100% { box-shadow: 0 10px 30px rgba(180, 100, 180, 0.3); }
     50%      { box-shadow: 0 10px 40px rgba(255, 110, 169, 0.7); }
   }
 
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
 
   @media (max-width: 500px) {
     .ui { padding: 34px 16px 40px; }
@@ -179,17 +125,14 @@
 </head>
 <body>
 
-  <!-- Background aurora -->
   <div class="aurora">
     <div class="blob b1"></div>
     <div class="blob b2"></div>
     <div class="blob b3"></div>
   </div>
 
-  <!-- Canvas 3D -->
   <canvas id="scene"></canvas>
 
-  <!-- UI Overlay -->
   <div class="ui">
     <div>
       <h1 class="title">Happy Birthday</h1>
@@ -198,26 +141,27 @@
 
     <div class="card">
       <p>Semoga panjang umur, sehat selalu,<br>dan semua impianmu terkabul. 💖</p>
+
+      <div class="stream-links">
+        <a href="https://audiomack.com/maeisthebest7/song/merry-christmas-please-dont-call" target="_blank" rel="noopener">🎧 Audiomack</a>
+        <a href="https://open.spotify.com/track/1TpcbMWFfgcfU8BO9bkaCt" target="_blank" rel="noopener">💚 Spotify</a>
+      </div>
+
       <button class="btn" id="blowBtn">Tiup Lilin 🎂</button>
     </div>
   </div>
 
-  <!-- Iframe YouTube tersembunyi untuk musik -->
-  <iframe id="ytAudio"
-          width="0" height="0"
-          src="https://www.youtube.com/embed/aBpYk9vuneE?enablejsapi=1&autoplay=0&loop=1&playlist=aBpYk9vuneE"
-          frameborder="0"
-          allow="autoplay; encrypted-media"
-          style="position:absolute; left:-9999px; top:-9999px;"
-          title="Background music"></iframe>
+  <!-- Container untuk YouTube player (tersembunyi) -->
+  <div id="ytPlayerContainer" style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px;"></div>
 
   <button class="music-btn" id="musicBtn" title="Putar / Jeda Musik">🎵</button>
 
+<script src="https://www.youtube.com/iframe_api"></script>
 <script type="module">
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 
 /* ============================================================
-   SETUP RENDERER, SCENE, CAMERA, LIGHTS
+   SETUP THREE.JS (SAMA SEPERTI SEBELUMNYA)
    ============================================================ */
 const canvas = document.getElementById('scene');
 const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
@@ -232,27 +176,22 @@ scene.fog = new THREE.Fog(0xffe0f0, 14, 30);
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
 camera.position.set(0, 2.5, 9);
 
-// Lights
 scene.add(new THREE.AmbientLight(0xffffff, 0.75));
-
 const keyLight = new THREE.DirectionalLight(0xfff0ff, 2.2);
 keyLight.position.set(5, 9, 7);
 scene.add(keyLight);
-
 const pinkLight = new THREE.PointLight(0xff6ea9, 9, 30);
 pinkLight.position.set(-5, 3, 4);
 scene.add(pinkLight);
-
 const blueLight = new THREE.PointLight(0x6ec1ff, 7, 30);
 blueLight.position.set(5, -1, 3);
 scene.add(blueLight);
-
 const purpleLight = new THREE.PointLight(0xc78bff, 6, 30);
 purpleLight.position.set(0, 6, -5);
 scene.add(purpleLight);
 
 /* ============================================================
-   CAKE 3D
+   CAKE 3D (SAMA)
    ============================================================ */
 const cakeGroup = new THREE.Group();
 cakeGroup.position.y = -0.4;
@@ -264,70 +203,42 @@ const layers = [
   { r: 1.0, h: 0.7,  y: 1.6,  color: 0xe0c3ff, frost: 0xf0e0ff },
 ];
 
-// Piring
-const plateMat = new THREE.MeshPhysicalMaterial({
-  color: 0xffffff, roughness: 0.15, metalness: 0.2, clearcoat: 1
-});
+const plateMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.15, metalness: 0.2, clearcoat: 1 });
 const plate = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.5, 0.1, 64), plateMat);
 plate.position.y = -0.05;
 cakeGroup.add(plate);
 
-// Shadow lembut
-const shadowMat = new THREE.MeshBasicMaterial({
-  color: 0x8b3a8b, transparent: true, opacity: 0.18
-});
+const shadowMat = new THREE.MeshBasicMaterial({ color: 0x8b3a8b, transparent: true, opacity: 0.18 });
 const shadow = new THREE.Mesh(new THREE.CircleGeometry(2.7, 64), shadowMat);
 shadow.rotation.x = -Math.PI / 2;
 shadow.position.y = -0.13;
 cakeGroup.add(shadow);
 
-// Layer & frosting
 layers.forEach((L) => {
-  const layerMat = new THREE.MeshPhysicalMaterial({
-    color: L.color, roughness: 0.55, clearcoat: 0.3
-  });
-  const layer = new THREE.Mesh(
-    new THREE.CylinderGeometry(L.r, L.r, L.h, 64, 1),
-    layerMat
-  );
+  const layerMat = new THREE.MeshPhysicalMaterial({ color: L.color, roughness: 0.55, clearcoat: 0.3 });
+  const layer = new THREE.Mesh(new THREE.CylinderGeometry(L.r, L.r, L.h, 64, 1), layerMat);
   layer.position.y = L.y + L.h / 2;
   cakeGroup.add(layer);
 
-  const frostMat = new THREE.MeshPhysicalMaterial({
-    color: L.frost, roughness: 0.25, clearcoat: 1
-  });
-
-  // frosting ring di atas
-  const frost = new THREE.Mesh(
-    new THREE.CylinderGeometry(L.r + 0.05, L.r + 0.05, 0.15, 64),
-    frostMat
-  );
+  const frostMat = new THREE.MeshPhysicalMaterial({ color: L.frost, roughness: 0.25, clearcoat: 1 });
+  const frost = new THREE.Mesh(new THREE.CylinderGeometry(L.r + 0.05, L.r + 0.05, 0.15, 64), frostMat);
   frost.position.y = L.y + L.h + 0.075;
   cakeGroup.add(frost);
 
-  // drip-drip manis di tepi
   const dripCount = 22;
   for (let i = 0; i < dripCount; i++) {
     const a = (i / dripCount) * Math.PI * 2;
     const r = L.r + 0.06;
     const len = 0.15 + Math.random() * 0.3;
-    const drop = new THREE.Mesh(
-      new THREE.SphereGeometry(0.07, 12, 12),
-      frostMat
-    );
-    drop.position.set(
-      Math.cos(a) * r,
-      L.y + L.h - len * 0.5 + 0.06,
-      Math.sin(a) * r
-    );
+    const drop = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), frostMat);
+    drop.position.set(Math.cos(a) * r, L.y + L.h - len * 0.5 + 0.06, Math.sin(a) * r);
     drop.scale.set(1, 1 + len * 4, 1);
     cakeGroup.add(drop);
   }
 });
 
-// Lilin + api
 const flames = [];
-const topY = 1.6 + 0.7 + 0.15;   // 2.45
+const topY = 1.6 + 0.7 + 0.15;
 const candleColors = [0xff6ea9, 0x6ec1ff, 0xb565e8];
 const candlePositions = [
   { x: -0.45, z: 0.28 },
@@ -336,94 +247,59 @@ const candlePositions = [
 ];
 
 candlePositions.forEach((p, i) => {
-  const candleMat = new THREE.MeshStandardMaterial({
-    color: candleColors[i], roughness: 0.5, metalness: 0.1
-  });
-  const candle = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.07, 0.07, 0.5, 20),
-    candleMat
-  );
+  const candleMat = new THREE.MeshStandardMaterial({ color: candleColors[i], roughness: 0.5, metalness: 0.1 });
+  const candle = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.5, 20), candleMat);
   candle.position.set(p.x, topY + 0.25, p.z);
   cakeGroup.add(candle);
 
-  // sumbu
-  const wick = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.008, 0.008, 0.06, 8),
-    new THREE.MeshBasicMaterial({ color: 0x222222 })
-  );
+  const wick = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.06, 8), new THREE.MeshBasicMaterial({ color: 0x222222 }));
   wick.position.set(p.x, topY + 0.53, p.z);
   cakeGroup.add(wick);
 
-  // api (sphere glow)
   const flameMat = new THREE.MeshBasicMaterial({
-    color: 0xffe08a,
-    transparent: true,
-    opacity: 0.95,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
+    color: 0xffe08a, transparent: true, opacity: 0.95,
+    blending: THREE.AdditiveBlending, depthWrite: false,
   });
   const flame = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), flameMat);
   flame.scale.y = 1.7;
   flame.position.set(p.x, topY + 0.66, p.z);
   cakeGroup.add(flame);
 
-  // cahaya api
   const flameLight = new THREE.PointLight(0xffbb55, 2.2, 5);
   flameLight.position.copy(flame.position);
   cakeGroup.add(flameLight);
 
-  flames.push({
-    mesh: flame,
-    light: flameLight,
-    baseY: topY + 0.66,
-    baseIntensity: 2.2,
-  });
+  flames.push({ mesh: flame, light: flameLight, baseY: topY + 0.66, baseIntensity: 2.2 });
 });
 
 /* ============================================================
-   BALON 3D
+   BALON 3D (SAMA)
    ============================================================ */
 const balloons = [];
 const balloonColors = [0xff9ec4, 0xa78bfa, 0x7dd3fc, 0xffd19e, 0x9effc8, 0xffc8d8, 0xffb3c9];
 
 function createBalloon(color, size) {
   const g = new THREE.Group();
-
   const bodyGeo = new THREE.SphereGeometry(0.5 * size, 32, 32);
   bodyGeo.scale(1, 1.2, 1);
-  const bodyMat = new THREE.MeshPhysicalMaterial({
-    color, roughness: 0.22, metalness: 0.05,
-    clearcoat: 1, clearcoatRoughness: 0.08,
-  });
+  const bodyMat = new THREE.MeshPhysicalMaterial({ color, roughness: 0.22, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.08 });
   const body = new THREE.Mesh(bodyGeo, bodyMat);
   g.add(body);
 
-  // simpul bawah
-  const knot = new THREE.Mesh(
-    new THREE.ConeGeometry(0.07 * size, 0.12 * size, 10),
-    bodyMat
-  );
+  const knot = new THREE.Mesh(new THREE.ConeGeometry(0.07 * size, 0.12 * size, 10), bodyMat);
   knot.position.y = -0.62 * size;
   knot.rotation.z = Math.PI;
   g.add(knot);
 
-  // tali
   const pts = [];
   for (let i = 0; i <= 24; i++) {
     const t = i / 24;
-    pts.push(new THREE.Vector3(
-      Math.sin(t * 5) * 0.09 * size,
-      -0.7 * size - t * 1.7 * size,
-      0
-    ));
+    pts.push(new THREE.Vector3(Math.sin(t * 5) * 0.09 * size, -0.7 * size - t * 1.7 * size, 0));
   }
   const stringGeo = new THREE.BufferGeometry().setFromPoints(pts);
-  const stringMat = new THREE.LineBasicMaterial({
-    color: 0xffffff, transparent: true, opacity: 0.55
-  });
+  const stringMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55 });
   const string = new THREE.Line(stringGeo, stringMat);
   g.add(string);
-
   return g;
 }
 
@@ -433,11 +309,7 @@ for (let i = 0; i < 11; i++) {
   const b = createBalloon(color, size);
   const angle = (i / 11) * Math.PI * 2 + Math.random() * 0.6;
   const radius = 4.5 + Math.random() * 3;
-  b.position.set(
-    Math.cos(angle) * radius,
-    Math.random() * 4.5 - 1.5,
-    Math.sin(angle) * radius - 2
-  );
+  b.position.set(Math.cos(angle) * radius, Math.random() * 4.5 - 1.5, Math.sin(angle) * radius - 2);
   b.userData = {
     basePos: b.position.clone(),
     phase: Math.random() * Math.PI * 2,
@@ -450,7 +322,7 @@ for (let i = 0; i < 11; i++) {
 }
 
 /* ============================================================
-   SPARKLES (Partikel Bercahaya)
+   SPARKLES (SAMA)
    ============================================================ */
 function makeSparkleTexture() {
   const c = document.createElement('canvas');
@@ -478,18 +350,14 @@ for (let i = 0; i < sparkleCount; i++) {
 const sparkleGeo = new THREE.BufferGeometry();
 sparkleGeo.setAttribute('position', new THREE.BufferAttribute(sparklePos, 3));
 const sparkleMat = new THREE.PointsMaterial({
-  size: 0.14,
-  map: makeSparkleTexture(),
-  transparent: true,
-  depthWrite: false,
-  blending: THREE.AdditiveBlending,
-  color: 0xffffff,
+  size: 0.14, map: makeSparkleTexture(), transparent: true,
+  depthWrite: false, blending: THREE.AdditiveBlending, color: 0xffffff,
 });
 const sparkles = new THREE.Points(sparkleGeo, sparkleMat);
 scene.add(sparkles);
 
 /* ============================================================
-   INTERAKSI MOUSE
+   MOUSE PARALLAX
    ============================================================ */
 let mouseX = 0, mouseY = 0;
 window.addEventListener('mousemove', (e) => {
@@ -507,11 +375,9 @@ function animate() {
   requestAnimationFrame(animate);
   const t = clock.getElapsedTime();
 
-  // Kue: mengapung & berputar lembut
   cakeGroup.position.y = -0.4 + Math.sin(t * 1.2) * 0.09;
   cakeGroup.rotation.y = Math.sin(t * 0.35) * 0.18;
 
-  // Api lilin berkedip
   flames.forEach((f, i) => {
     if (blown) {
       f.mesh.visible = false;
@@ -525,7 +391,6 @@ function animate() {
     }
   });
 
-  // Balon mengapung bebas
   balloons.forEach((b) => {
     const d = b.userData;
     b.position.y = d.basePos.y + Math.sin(t * d.speed + d.phase) * d.floatAmp;
@@ -534,11 +399,9 @@ function animate() {
     b.rotation.y = t * d.rotSpeed;
   });
 
-  // Sparkles berputar
   sparkles.rotation.y = t * 0.05;
   sparkles.rotation.x = Math.sin(t * 0.1) * 0.08;
 
-  // Kamera parallax mengikuti mouse
   camera.position.x = mouseX * 1.6 + Math.sin(t * 0.15) * 0.35;
   camera.position.y = 2.5 - mouseY * 0.85;
   camera.lookAt(0, 1, 0);
@@ -547,9 +410,6 @@ function animate() {
 }
 animate();
 
-/* ============================================================
-   RESIZE
-   ============================================================ */
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -567,37 +427,73 @@ blowBtn.addEventListener('click', () => {
 });
 
 /* ============================================================
-   MUSIK YOUTUBE
+   SISTEM MUSIK — YOUTUBE IFRAME API (DIPERBAIKI)
    ============================================================ */
-const ytFrame = document.getElementById('ytAudio');
 const musicBtn = document.getElementById('musicBtn');
+let ytPlayer = null;
 let isPlaying = false;
+let playerReady = false;
 
-function sendYTCommand(func, args = []) {
-  if (ytFrame && ytFrame.contentWindow) {
-    ytFrame.contentWindow.postMessage(
-      JSON.stringify({ event: 'command', func: func, args: args }),
-      '*'
-    );
+// Video ID Bleachers - Merry Christmas, Please Don't Call
+const VIDEO_ID = 'aBpYk9vuneE';
+
+// Callback global yang dipanggil otomatis oleh YouTube API
+window.onYouTubeIframeAPIReady = function () {
+  ytPlayer = new YT.Player('ytPlayerContainer', {
+    height: '1',
+    width: '1',
+    videoId: VIDEO_ID,
+    playerVars: {
+      autoplay: 0,
+      controls: 0,
+      loop: 1,
+      playlist: VIDEO_ID,
+      modestbranding: 1,
+      rel: 0,
+    },
+    events: {
+      onReady: () => {
+        playerReady = true;
+        console.log('YouTube Player siap digunakan.');
+      },
+      onStateChange: (event) => {
+        // Sinkronkan status tombol dengan status player sebenarnya
+        if (event.data === YT.PlayerState.PLAYING) {
+          isPlaying = true;
+          musicBtn.textContent = '⏸️';
+          musicBtn.classList.add('playing');
+        } else {
+          isPlaying = false;
+          musicBtn.textContent = '🎵';
+          musicBtn.classList.remove('playing');
+        }
+      },
+    },
+  });
+};
+
+function playMusic() {
+  if (ytPlayer && playerReady) {
+    ytPlayer.playVideo();
   }
 }
 
-function playMusic() {
-  sendYTCommand('playVideo');
-  isPlaying = true;
-  musicBtn.textContent = '⏸️';
-  musicBtn.classList.add('playing');
-}
-
 function pauseMusic() {
-  sendYTCommand('pauseVideo');
-  isPlaying = false;
-  musicBtn.textContent = '🎵';
-  musicBtn.classList.remove('playing');
+  if (ytPlayer && playerReady) {
+    ytPlayer.pauseVideo();
+  }
 }
 
 musicBtn.addEventListener('click', () => {
-  isPlaying ? pauseMusic() : playMusic();
+  if (!playerReady) {
+    console.warn('Player belum siap, tunggu sebentar...');
+    return;
+  }
+  if (isPlaying) {
+    pauseMusic();
+  } else {
+    playMusic();
+  }
 });
 </script>
 </body>
