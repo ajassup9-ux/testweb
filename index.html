@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AM Preset Finder - Real</title>
+    <title>AM Preset Finder - Real API</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -24,7 +24,8 @@
         .input-wrapper { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; padding: 0 16px; }
         .input-wrapper svg { width: 18px; height: 18px; stroke: var(--text-muted); fill: none; stroke-width: 2; margin-right: 12px; }
         .input-wrapper input { background: none; border: none; color: var(--text); width: 100%; padding: 14px 0; font-size: 14px; outline: none; }
-        .btn-primary { background: var(--primary); color: #000; border: none; border-radius: 8px; padding: 0 24px; font-weight: 700; font-size: 14px; cursor: pointer; }
+        .btn-primary { background: var(--primary); color: #000; border: none; border-radius: 8px; padding: 0 24px; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .btn-primary:active { transform: scale(0.95); }
 
         .pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 24px; }
         .pill { background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); padding: 8px 16px; border-radius: 20px; font-size: 12px; white-space: nowrap; }
@@ -36,18 +37,23 @@
 
         .result-state { display: none; flex-direction: column; gap: 16px; }
         .result-state.active { display: flex; }
-        .video-box { width: 100%; aspect-ratio: 9/16; max-height: 500px; background: #222; border-radius: 8px; background-size: cover; background-position: center; }
+        
+        .video-box { width: 100%; aspect-ratio: 1/1; max-height: 500px; background: #222; border-radius: 8px; background-size: cover; background-position: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        
         .caption-text { font-size: 13px; color: #e0e0e0; line-height: 1.5; word-wrap: break-word; }
+        .caption-text a { color: var(--primary); text-decoration: none; }
 
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; margin: 8px 0; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 8px 0; }
         .stat-item { display: flex; flex-direction: column; }
         .stat-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
         .stat-value { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-        .avatar-sm { width: 20px; height: 20px; border-radius: 50%; background-size: cover; background-position: center; }
+        .avatar-sm { width: 24px; height: 24px; border-radius: 50%; background-size: cover; background-position: center; }
 
         .audio-bar { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
         .audio-info { display: flex; align-items: center; gap: 12px; }
-        .audio-thumb { width: 44px; height: 44px; border-radius: 50%; background-size: cover; background-position: center; position: relative; }
+        .audio-thumb { width: 44px; height: 44px; border-radius: 50%; background-size: cover; background-position: center; position: relative; display: flex; justify-content: center; align-items: center; }
+        .audio-thumb::after { content: '🎵'; position: absolute; bottom: -2px; left: -2px; background: var(--primary); border-radius: 50%; width: 18px; height: 18px; font-size: 10px; display: flex; justify-content: center; align-items: center; border: 2px solid var(--bg); }
+        
         .audio-title { font-size: 14px; font-weight: 600; }
         .audio-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
@@ -69,7 +75,6 @@
         .btn-action.outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
         
         .error-msg { background: #ff3333; color: white; padding: 12px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; display: none; }
-        
         .hidden { display: none !important; }
     </style>
 </head>
@@ -92,19 +97,15 @@
             <div class="search-container">
                 <div class="input-wrapper">
                     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" id="searchInput" placeholder="https://vt.tiktok.com/...">
+                    <input type="text" id="searchInput" placeholder="https://vt.tiktok.com/..." value="https://vt.tiktok.com/ZSgvc5kMx/">
                 </div>
                 <button class="btn-primary" onclick="handleSearch()">Cari</button>
-            </div>
-
-            <div class="pills">
-                <div class="pill">Tempel link TikTok lu di sini</div>
             </div>
         </div>
 
         <div class="loading-state" id="loadingState">
             <div class="spinner"></div>
-            <div style="font-weight: 600;">Memindai TikTok (Real)...</div>
+            <div style="font-weight: 600;">Menarik data asli dari TikTok...</div>
         </div>
 
         <div class="result-state" id="resultState">
@@ -117,10 +118,6 @@
                     <div class="stat-value">
                         <div class="avatar-sm" id="resAvatar"></div> <span id="resAuthor">@...</span>
                     </div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">KOMENTAR</span>
-                    <span class="stat-value" id="resComments">0</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">DITONTON</span>
@@ -152,11 +149,8 @@
     </main>
 
     <script>
-        // GANTI URL INI KALAU BACKEND LU UDAH DI-DEPLOY (misal ke vercel/render)
-        // Kalau jalan di laptop lokal, biarin localhost:3000
-        const API_BASE_URL = 'http://localhost:3000';
-
         function formatNumber(num) {
+            if (!num) return '0';
             if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
             if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
             return num.toString();
@@ -178,56 +172,68 @@
             document.getElementById('resultState').classList.remove('active');
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/search?url=${encodeURIComponent(input)}`);
-                const data = await response.json();
+                // Pake API publik gratisan buat narik data TikTok asli
+                const response = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(input)}`);
+                const json = await response.json();
 
-                if (!response.ok) throw new Error(data.error || 'Gagal ambil data');
+                if (json.code !== 0 || !json.data) {
+                    throw new Error('Link invalid atau video di-private.');
+                }
 
-                // Populate UI
-                document.getElementById('resAuthor').innerText = '@' + data.author.username;
+                const data = json.data;
+
+                // Populate UI dengan data ASLI
+                document.getElementById('resAuthor').innerText = '@' + data.author.unique_id;
                 document.getElementById('resAvatar').style.backgroundImage = `url(${data.author.avatar})`;
-                document.getElementById('resComments').innerText = formatNumber(data.stats.commentCount);
-                document.getElementById('resViews').innerText = formatNumber(data.stats.playCount);
-                document.getElementById('resLikes').innerText = formatNumber(data.stats.diggCount);
+                document.getElementById('resViews').innerText = formatNumber(data.play_count);
+                document.getElementById('resLikes').innerText = formatNumber(data.digg_count);
                 
-                document.getElementById('resDesc').innerText = data.desc;
-                document.getElementById('resMusicTitle').innerText = data.music.title;
-                document.getElementById('resMusicAuthor').innerText = data.music.author;
-                document.getElementById('resMusicCover').style.backgroundImage = `url(${data.music.cover})`;
+                // Deskripsi asli
+                document.getElementById('resDesc').innerText = data.title;
                 
-                // Fallback video background (karena thumbnail video gak dikasih sama API, pake bg default)
-                document.getElementById('resVideoBox').style.backgroundImage = `url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop')`;
+                // Musik asli
+                document.getElementById('resMusicTitle').innerText = data.music_info.title;
+                document.getElementById('resMusicAuthor').innerText = data.music_info.author;
+                document.getElementById('resMusicCover').style.backgroundImage = `url(${data.music_info.cover})`;
+                
+                // Thumbnail Video asli
+                document.getElementById('resVideoBox').style.backgroundImage = `url(${data.cover})`;
 
-                // Render Presets
+                // Ekstrak Link Alight Motion dari Deskripsi
                 const container = document.getElementById('presetContainer');
                 const countBadge = document.getElementById('resPresetCount');
                 container.innerHTML = '';
-                countBadge.innerText = data.presets.length;
+                
+                // Regex buat nyari link alightcreative.com di deskripsi
+                const regexAM = /(https?:\/\/(?:www\.)?alightcreative\.com\/[^\s]+)/g;
+                const amLinks = data.title.match(regexAM) || [];
+                
+                countBadge.innerText = amLinks.length;
 
-                if (data.presets.length === 0) {
-                    container.innerHTML = `<div style="color: var(--text-muted); font-size: 14px; padding: 10px;">Gak ada link Alight Motion di deskripsi video ini, gng. Coba cek komen manual.</div>`;
+                if (amLinks.length === 0) {
+                    container.innerHTML = `<div style="color: var(--text-muted); font-size: 14px; padding: 10px; background: var(--surface); border-radius: 8px; border: 1px solid var(--border);">Gak ada link Alight Motion di deskripsi video ini. Coba cek komen manual atau cari video lain.</div>`;
                 } else {
-                    data.presets.forEach((preset, i) => {
+                    amLinks.forEach((link, i) => {
                         const card = document.createElement('div');
                         card.className = 'preset-card';
                         card.innerHTML = `
                             <div class="preset-header">
-                                <div class="preset-thumb" style="background-image: url('${data.music.cover}')"></div>
+                                <div class="preset-thumb" style="background-image: url('${data.cover}')"></div>
                                 <div class="preset-info">
-                                    <h4>${preset.title}</h4>
+                                    <h4>Preset AM #${i + 1}</h4>
                                     <div class="tag-group">
-                                        <span class="tag">${preset.size}</span>
-                                        <span class="tag dark">${preset.source.toUpperCase()}</span>
+                                        <span class="tag">REAL LINK</span>
+                                        <span class="tag dark">DESKRIPSI</span>
                                     </div>
-                                    <div class="preset-sub">@${data.author.username}</div>
+                                    <div class="preset-sub">@${data.author.unique_id}</div>
                                 </div>
                             </div>
-                            <div class="link-box">${preset.link}</div>
+                            <div class="link-box">${link}</div>
                             <div class="action-btns">
-                                <a href="${preset.link}" target="_blank" class="btn-action primary">
+                                <a href="${link}" target="_blank" class="btn-action primary">
                                     Buka
                                 </a>
-                                <button class="btn-action outline" onclick="navigator.clipboard.writeText('${preset.link}'); this.innerText='✅ Tersalin'; setTimeout(()=>this.innerText='Salin', 2000)">
+                                <button class="btn-action outline" onclick="navigator.clipboard.writeText('${link}'); this.innerText='✅ Tersalin'; setTimeout(()=>this.innerText='Salin', 2000)">
                                     Salin
                                 </button>
                             </div>
