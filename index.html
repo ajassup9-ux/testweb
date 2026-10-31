@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AM Preset Finder - Ultra Deep Scan</title>
+    <title>AM Preset Finder - Reply Scanner</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -90,14 +90,14 @@
     <main>
         <div id="searchView">
             <div style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">
-                Ultra Deep Scan: Nyari Link & Teks "Preset AM 5mb/XML" di Deskripsi + 1000 Komentar.
+                Deep Scan (Deskripsi + Komen + Balasan Komen).
             </div>
             <div class="error-msg" id="errMsg"></div>
 
             <div class="search-container">
                 <div class="input-wrapper">
                     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" id="searchInput" placeholder="https://vt.tiktok.com/..." value="https://www.tiktok.com/@wanx.prstt/video/7347181243243441413">
+                    <input type="text" id="searchInput" placeholder="https://vt.tiktok.com/..." value="https://www.tiktok.com/@byptryaa21/video/7414824196540947730">
                 </div>
                 <button class="btn-primary" onclick="handleSearch()">Cari</button>
             </div>
@@ -105,7 +105,7 @@
 
         <div class="loading-state" id="loadingState">
             <div class="spinner"></div>
-            <div style="font-weight: 600;">Memindai Video...</div>
+            <div style="font-weight: 600;">Memindai Video & Balasan Komen...</div>
             <div class="progress-text" id="progressText"></div>
         </div>
 
@@ -202,39 +202,34 @@
                 document.getElementById('resMusicAuthor').innerText = data.music_info.author;
                 document.getElementById('resMusicCover').style.backgroundImage = `url(${data.music_info.cover})`;
 
-                // 2. ULTRA DEEP SCAN KOMENTAR (PAGINATION 1000)
+                // 2. ULTRA DEEP SCAN (Komen + Reply)
                 let foundLinks = [];
-                let foundTexts = [];
                 let cursor = 0;
                 let hasMore = true;
                 let totalFetched = 0;
+                const maxComments = 1000; // Batas maksimal
 
-                progressText.innerText = 'Memulai Ultra Deep Scan...';
+                const urlRegex = /(https?:\/\/(?:www\.)?(?:alightcreative|alightmotion)\.com\/[^\s]+)/gi;
+
+                progressText.innerText = 'Memulai Deep Scan Komentar & Balasan...';
 
                 // Scan deskripsi dulu
-                const urlRegex = /(https?:\/\/(?:www\.)?(?:alightcreative|alightmotion)\.com\/[^\s]+)/gi;
-                const textKeywords = /(?:preset\s*am|am\s*preset|preset\s*xml|xml\s*preset|preset\s*5mb|5mb\s*preset|am\s*xml|xml\s*am|alightmotion)/i;
-
                 const descUrls = data.title.match(urlRegex);
                 if (descUrls) descUrls.forEach(u => foundLinks.push(u.replace(/[.,;!?]+$/, '')));
 
-                if (textKeywords.test(data.title)) {
-                    foundTexts.push({ text: data.title, source: 'Deskripsi' });
-                }
-
-                // Loop Komen
-                while (hasMore && totalFetched < 1000) {
-                    progressText.innerText = `Memindai komentar (${totalFetched} / 1000)...`;
+                // Loop Komen Utama
+                while (hasMore && totalFetched < maxComments) {
+                    progressText.innerText = `Memindai komentar (${totalFetched} / ${maxComments})...`;
                     
                     try {
-                        const commentRes = await fetch(`https://www.tikwm.com/api/comment/list/?url=${encodeURIComponent(input)}&count=50&cursor=${cursor}`);
+                        const commentRes = await fetch(`https://www.tikwm.com/api/comment/list/?url=${encodeURIComponent(input)}&count=20&cursor=${cursor}`);
                         const commentJson = await commentRes.json();
                         
                         if (commentJson.code === 0 && commentJson.data && commentJson.data.comments && commentJson.data.comments.length > 0) {
                             let foundUrlInPage = false;
 
-                            commentJson.data.comments.forEach(c => {
-                                // Cek Link
+                            for (const c of commentJson.data.comments) {
+                                // Cek komen utama
                                 const urls = c.text.match(urlRegex);
                                 if (urls) {
                                     urls.forEach(u => {
@@ -246,50 +241,69 @@
                                     });
                                 }
 
-                                // Cek Teks (AM 5MB, XML, dll)
-                                if (textKeywords.test(c.text) && c.text.length < 150) {
-                                    // Biar gak double, cek dulu
-                                    if (!foundTexts.some(ft => ft.text === c.text)) {
-                                        foundTexts.push({ text: c.text, source: 'Komentar' });
+                                totalFetched++;
+                                if (totalFetched >= maxComments || foundUrlInPage) break;
+
+                                // Cek Reply (Balasan) jika ada
+                                if (c.reply_comment_total > 0) {
+                                    progressText.innerText = `Memeriksa balasan komen (${totalFetched} / ${maxComments})...`;
+                                    try {
+                                        const replyRes = await fetch(`https://www.tikwm.com/api/comment/reply/list/?url=${encodeURIComponent(input)}&cid=${c.cid}&count=20`);
+                                        const replyJson = await replyRes.json();
+                                        
+                                        if (replyJson.code === 0 && replyJson.data && replyJson.data.comments) {
+                                            replyJson.data.comments.forEach(r => {
+                                                const rUrls = r.text.match(urlRegex);
+                                                if (rUrls) {
+                                                    rUrls.forEach(u => {
+                                                        const cleanLink = u.replace(/[.,;!?]+$/, '');
+                                                        if (!foundLinks.includes(cleanLink)) {
+                                                            foundLinks.push(cleanLink);
+                                                            foundUrlInPage = true;
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    } catch (e) {
+                                        console.log("Gagal narik reply", e);
                                     }
+                                    // Delay bentar biar gak kena rate-limit
+                                    await new Promise(r => setTimeout(r, 100));
                                 }
-                            });
+                            }
                             
-                            totalFetched += commentJson.data.comments.length;
                             const newCursor = commentJson.data.cursor;
                             hasMore = commentJson.data.has_more && newCursor !== cursor; 
                             cursor = newCursor;
 
-                            // Kalau URL alightcreative udah ketemu di page ini, kita stop narik komen (karena udah dapet target utama)
                             if (foundUrlInPage) {
-                                progressText.innerText = `Link AM ketemu di komen ke-${totalFetched}! Menyelesaikan...`;
+                                progressText.innerText = `Link AM ketemu! Menyelesaikan...`;
                                 hasMore = false; 
                             }
                         } else {
-                            hasMore = false; // Kalo gagal / udah abis
+                            hasMore = false;
                         }
                     } catch (e) {
                         console.log("Error fetching comments page.");
                         hasMore = false;
                     }
                     
-                    await new Promise(r => setTimeout(r, 300)); // Delay anti rate-limit
+                    await new Promise(r => setTimeout(r, 300)); 
                 }
 
-                progressText.innerText = `Selesai memindai ${totalFetched} komentar.`;
+                progressText.innerText = `Selesai memindai.`;
 
                 // 3. RENDER HASIL
                 const container = document.getElementById('presetContainer');
                 const countBadge = document.getElementById('resPresetCount');
                 container.innerHTML = '';
                 
-                const totalFound = foundLinks.length + foundTexts.length;
-                countBadge.innerText = totalFound;
+                countBadge.innerText = foundLinks.length;
 
-                if (totalFound === 0) {
-                    container.innerHTML = `<div style="color: var(--text-muted); font-size: 14px; padding: 10px; background: var(--surface); border-radius: 8px; border: 1px solid var(--border);">Gila, udah di-scan sampai ${totalFetched} komen tetep gak ada link atau teks preset AM-nya. Berarti beneran kosong gng.</div>`;
+                if (foundLinks.length === 0) {
+                    container.innerHTML = `<div style="color: var(--text-muted); font-size: 14px; padding: 10px; background: var(--surface); border-radius: 8px; border: 1px solid var(--border);">Gila, udah di-scan komen & balasannya tetep gak ada link Alight Motion asli. Bisa jadi beneran kosong atau di bio.</div>`;
                 } else {
-                    // Render Link yang ketemu
                     foundLinks.forEach((link, i) => {
                         const card = document.createElement('div');
                         card.className = 'preset-card';
@@ -300,8 +314,9 @@
                                     <h4>Link AM #${i + 1}</h4>
                                     <div class="tag-group">
                                         <span class="tag">REAL LINK</span>
+                                        <span class="tag dark">KOMENTAR/BALASAN</span>
                                     </div>
-                                    <div class="preset-sub">Ditemukan otomatis</div>
+                                    <div class="preset-sub">Berhasil dideteksi</div>
                                 </div>
                             </div>
                             <div class="link-box">${link}</div>
@@ -313,27 +328,6 @@
                                     Salin
                                 </button>
                             </div>
-                        `;
-                        container.appendChild(card);
-                    });
-
-                    // Render Teks yang nyebut "Preset AM 5mb" dll
-                    foundTexts.forEach((item, i) => {
-                        const card = document.createElement('div');
-                        card.className = 'preset-card';
-                        card.innerHTML = `
-                            <div class="preset-header">
-                                <div class="preset-thumb" style="background-image: url('${data.cover}')"></div>
-                                <div class="preset-info">
-                                    <h4>Teks Deteksi #${i + 1}</h4>
-                                    <div class="tag-group">
-                                        <span class="tag yellow">SEBUTAN PRESET</span>
-                                        <span class="tag dark">${item.source.toUpperCase()}</span>
-                                    </div>
-                                    <div class="preset-sub">Cek manual di komen/bio</div>
-                                </div>
-                            </div>
-                            <div class="link-box" style="font-family: 'Inter', sans-serif; color: #fff;">"${item.text}"</div>
                         `;
                         container.appendChild(card);
                     });
@@ -352,3 +346,4 @@
     </script>
 </body>
 </html>
+        
