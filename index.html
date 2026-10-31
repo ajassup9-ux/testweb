@@ -29,10 +29,16 @@
             --font-body: 'Plus Jakarta Sans', sans-serif;
         }
 
-        * {
-            box-sizing: border-box;
+        /* FIX 1: Perbaikan Layout Mobile agar tidak terpotong */
+        html, body {
+            height: 100%;
             margin: 0;
             padding: 0;
+            overflow: hidden; /* Mencegah layar ikut kescroll */
+        }
+
+        * {
+            box-sizing: border-box;
             font-family: var(--font-body);
             -webkit-tap-highlight-color: transparent;
         }
@@ -42,19 +48,17 @@
             color: var(--text-main);
             display: flex;
             justify-content: center;
-            height: 100vh;
-            overflow: hidden;
         }
 
         /* Container Utama */
         #app {
             width: 100%;
             max-width: 480px;
-            height: 100%;
+            height: 100%; /* Mengisi tinggi layar dengan pas */
             display: flex;
             flex-direction: column;
             position: relative;
-            background: url('https://www.transparenttextures.com/patterns/stardust.png'); /* Pattern bintang halus */
+            background: url('https://www.transparenttextures.com/patterns/stardust.png');
             z-index: 1;
         }
 
@@ -81,7 +85,7 @@
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             color: var(--text-main);
-            font-size: 18px;
+            font-size: 20px;
             width: 40px;
             height: 40px;
             border-radius: 12px;
@@ -90,10 +94,11 @@
             align-items: center;
             justify-content: center;
             transition: 0.3s;
+            font-weight: bold;
         }
 
-        .icon-btn:hover {
-            background: rgba(255,255,255,0.1);
+        .icon-btn:active {
+            background: rgba(255,255,255,0.2);
         }
 
         /* Bar Nama User */
@@ -154,10 +159,6 @@
             transition: transform 0.3s ease;
         }
 
-        .poll-card:hover {
-            transform: translateY(-2px);
-        }
-
         .creator-name {
             font-size: 12px;
             color: var(--accent-pink);
@@ -201,11 +202,6 @@
             position: relative;
             overflow: hidden;
             transition: all 0.3s ease;
-        }
-
-        .option-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.2);
         }
 
         .option-item.selected {
@@ -320,11 +316,6 @@
             box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
             transition: 0.3s;
         }
-
-        .vote-btn:hover {
-            transform: scale(1.05);
-            box-shadow: var(--glow);
-        }
         
         .vote-btn.active {
             display: block;
@@ -347,34 +338,30 @@
             width: 60px;
             height: 60px;
             background: var(--accent-gradient);
-            border-radius: 20px; /* Kotak membulat, bukan bulat sempurna */
+            border-radius: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             color: white;
-            font-size: 30px;
+            font-size: 28px;
             box-shadow: 0 8px 20px rgba(255, 0, 127, 0.4);
             cursor: pointer;
             z-index: 10;
             transition: 0.3s;
         }
 
-        .fab:hover {
-            transform: rotate(90deg) scale(1.1);
-        }
-
-        /* Modal Fullscreen */
+        /* FIX 2: Modal Diperbaiki agar tidak error */
         .modal {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-gradient);
-            z-index: 20;
+            z-index: 999; /* Z-index tinggi agar pasti muncul di atas */
             display: none;
             flex-direction: column;
         }
 
         .modal.active {
-            display: flex;
+            display: flex !important; /* Paksa muncul */
         }
 
         .modal-header {
@@ -441,10 +428,6 @@
             transition: 0.3s;
         }
 
-        .add-option-btn:hover {
-            background: rgba(255, 0, 127, 0.1);
-        }
-
         /* Setting Toggle */
         .setting-row {
             display: flex;
@@ -492,15 +475,10 @@
             transition: 0.3s;
         }
 
-        .submit-btn:hover {
-            box-shadow: var(--glow);
-        }
-
         /* Scrollbar Aesthetic */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent-purple); }
     </style>
 </head>
 <body>
@@ -509,7 +487,8 @@
     <!-- Header -->
     <header>
         <h1>VIBE VOTING ✦</h1>
-        <button class="icon-btn" onclick="openCreateModal()">+</button>
+        <!-- Ditambahkan type="button" agar tidak bentrok -->
+        <button type="button" class="icon-btn" onclick="openCreateModal()">+</button>
     </header>
 
     <!-- Input Nama Pemilih -->
@@ -529,8 +508,8 @@
     <!-- Modal Buat Polling -->
     <div class="modal" id="createModal">
         <div class="modal-header">
-            <button class="icon-btn" onclick="closeCreateModal()">←</button>
-            <h2>Buat Polling Baru</h2>
+            <button type="button" class="icon-btn" onclick="closeCreateModal()">←</button>
+            <h2>Buat Polling</h2>
         </div>
         
         <div class="modal-body">
@@ -549,7 +528,7 @@
                 <!-- Input opsi dinamis -->
             </div>
 
-            <button class="add-option-btn" onclick="addOptionInput()">+ Tambah Pilihan</button>
+            <button type="button" class="add-option-btn" onclick="addOptionInput()">+ Tambah Pilihan</button>
 
             <div class="setting-row">
                 <span>Bisa pilih lebih dari 1?</span>
@@ -559,39 +538,65 @@
                 </label>
             </div>
 
-            <button class="submit-btn" onclick="createPoll()">Publish Voting 🚀</button>
+            <button type="button" class="submit-btn" onclick="createPoll()">Publish Voting 🚀</button>
         </div>
     </div>
 </div>
 
 <script>
-    // State Data (Gunakan versi v3 agar reset dari sebelumnya)
-    let polls = JSON.parse(localStorage.getItem('class_polls_v3')) || [];
-    let votedPolls = JSON.parse(localStorage.getItem('voted_polls_v3')) || [];
+    // FIX 3: Membungkus LocalStorage dengan Try-Catch agar tidak crash di browser tertentu
+    let polls = [];
+    let votedPolls = [];
+    let currentUser = '';
     let tempSelections = {}; 
-    let currentUser = localStorage.getItem('current_user_name') || '';
 
+    try {
+        const storedPolls = localStorage.getItem('class_polls_v3');
+        if (storedPolls) polls = JSON.parse(storedPolls);
+        
+        const storedVoted = localStorage.getItem('voted_polls_v3');
+        if (storedVoted) votedPolls = JSON.parse(storedVoted);
+        
+        const storedName = localStorage.getItem('current_user_name');
+        if (storedName) currentUser = storedName;
+    } catch (e) {
+        console.warn("Akses LocalStorage diblokir browser. Voting tetap jalan tapi data tidak tersimpan permanen.");
+    }
+
+    function saveToLocalStorage() {
+        try {
+            localStorage.setItem('class_polls_v3', JSON.stringify(polls));
+            localStorage.setItem('voted_polls_v3', JSON.stringify(votedPolls));
+            localStorage.setItem('current_user_name', currentUser);
+        } catch (e) {}
+    }
+
+    // Pastikan DOM sudah diload sebelum render
     document.addEventListener('DOMContentLoaded', () => {
         if (currentUser) {
-            document.getElementById('userNameInput').value = currentUser;
+            const nameInput = document.getElementById('userNameInput');
+            if(nameInput) nameInput.value = currentUser;
         }
         renderPolls();
-        addOptionInput(); 
-        addOptionInput();
     });
 
     function saveUserName() {
-        currentUser = document.getElementById('userNameInput').value.trim();
-        localStorage.setItem('current_user_name', currentUser);
+        const nameInput = document.getElementById('userNameInput');
+        if(nameInput) {
+            currentUser = nameInput.value.trim();
+            saveToLocalStorage();
+        }
     }
 
     // Render Polling
     function renderPolls() {
         const container = document.getElementById('pollContainer');
+        if (!container) return;
+        
         container.innerHTML = '';
 
         if (polls.length === 0) {
-            container.innerHTML = '<div style="text-align:center; color:#a0a0b0; margin-top:50px; font-size:14px;">Belum ada votingan nih.<br>Klik tombol + untuk bikin!</div>';
+            container.innerHTML = '<div style="text-align:center; color:#a0a0b0; margin-top:50px; font-size:14px; padding:20px;">Belum ada votingan nih.<br>Klik tombol + untuk bikin!</div>';
             return;
         }
 
@@ -645,19 +650,6 @@
                 `;
             });
 
-            headerHTML += `
-                    <div class="option-item ${selectedClass}" onclick="toggleSelection('${poll.id}', '${opt.id}')">
-                        ${progressBar}
-                        <div class="radio-circle"></div>
-                        <div class="option-content">
-                            <div class="option-text">${opt.text}</div>
-                            ${votersHTML}
-                        </div>
-                        ${voteCountText}
-                    </div>
-                `;
-            });
-
             headerHTML += `</div>`; 
 
             let footerHTML = '';
@@ -665,7 +657,7 @@
                 let isSelected = tempSelections[poll.id] && tempSelections[poll.id].length > 0;
                 footerHTML = `
                     <div class="poll-footer">
-                        <button class="vote-btn ${isSelected ? 'active' : ''}" onclick="submitVote('${poll.id}')">Kirim Suara</button>
+                        <button type="button" class="vote-btn ${isSelected ? 'active' : ''}" onclick="submitVote('${poll.id}')">Kirim Suara</button>
                     </div>
                 `;
             } else {
@@ -707,7 +699,8 @@
     function submitVote(pollId) {
         if (!currentUser) {
             alert('Isi ID/Nama kamu di atas dulu ya biar tau siapa yang vote!');
-            document.getElementById('userNameInput').focus();
+            const nameInput = document.getElementById('userNameInput');
+            if(nameInput) nameInput.focus();
             return;
         }
 
@@ -724,33 +717,45 @@
         });
 
         votedPolls.push(pollId);
-        
-        localStorage.setItem('class_polls_v3', JSON.stringify(polls));
-        localStorage.setItem('voted_polls_v3', JSON.stringify(votedPolls));
+        saveToLocalStorage(); // Panggil fungsi save yang aman
 
         delete tempSelections[pollId];
         renderPolls(); 
     }
 
-    // Modal Buat
+    // Buka Modal
     function openCreateModal() {
-        document.getElementById('createModal').classList.add('active');
-        document.getElementById('creatorNameInput').value = currentUser;
-        document.getElementById('pollQuestion').value = '';
-        document.getElementById('allowMultiple').checked = true;
-        
-        const container = document.getElementById('optionsContainer');
-        container.innerHTML = '<label>Pilihan Jawaban</label>';
-        addOptionInput();
-        addOptionInput();
+        const modal = document.getElementById('createModal');
+        if (modal) {
+            modal.classList.add('active');
+            
+            const creatorInput = document.getElementById('creatorNameInput');
+            if(creatorInput) creatorInput.value = currentUser || '';
+            
+            const qInput = document.getElementById('pollQuestion');
+            if(qInput) qInput.value = '';
+            
+            const multiInput = document.getElementById('allowMultiple');
+            if(multiInput) multiInput.checked = true;
+            
+            const container = document.getElementById('optionsContainer');
+            if(container) {
+                container.innerHTML = '<label>Pilihan Jawaban</label>';
+                addOptionInput();
+                addOptionInput();
+            }
+        }
     }
 
     function closeCreateModal() {
-        document.getElementById('createModal').classList.remove('active');
+        const modal = document.getElementById('createModal');
+        if(modal) modal.classList.remove('active');
     }
 
     function addOptionInput() {
         const container = document.getElementById('optionsContainer');
+        if(!container) return;
+
         const inputDiv = document.createElement('div');
         inputDiv.style.marginBottom = '10px';
         inputDiv.innerHTML = `<input type="text" class="input-field option-input" placeholder="Teks Pilihan..." maxlength="100">`;
@@ -759,9 +764,15 @@
 
     // Proses Bikin Polling
     function createPoll() {
-        const creator = document.getElementById('creatorNameInput').value.trim();
-        const question = document.getElementById('pollQuestion').value.trim();
-        const allowMultiple = document.getElementById('allowMultiple').checked;
+        const creatorEl = document.getElementById('creatorNameInput');
+        const questionEl = document.getElementById('pollQuestion');
+        const allowMultipleEl = document.getElementById('allowMultiple');
+        
+        if (!creatorEl || !questionEl || !allowMultipleEl) return;
+
+        const creator = creatorEl.value.trim();
+        const question = questionEl.value.trim();
+        const allowMultiple = allowMultipleEl.checked;
         const optionInputs = document.querySelectorAll('.option-input');
         
         let options = [];
@@ -798,7 +809,7 @@
         };
 
         polls.push(newPoll);
-        localStorage.setItem('class_polls_v3', JSON.stringify(polls));
+        saveToLocalStorage(); // Panggil fungsi save yang aman
 
         closeCreateModal();
         renderPolls();
