@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REPORT TELEGRAM - OBLIVION</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #020202; --surface: rgba(10, 5, 5, 0.85);
+            --primary: #ff003c; --primary-glow: rgba(255, 0, 60, 0.6);
+            --text: #e0e0e0; --text-muted: #888; --border: rgba(255, 0, 60, 0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            background-color: var(--bg); color: var(--text); font-family: 'Share Tech Mono', monospace; 
+            min-height: 100vh; display: flex; justify-content: center; align-items: center; 
+            overflow: hidden; perspective: 1000px;
+        }
+
+        /* BACKGROUND ANIME 3D PARALLAX */
+        .bg-container {
+            position: fixed; top: -5%; left: -5%; width: 110%; height: 110%;
+            z-index: -2; overflow: hidden; pointer-events: none;
+        }
+        .bg-anime {
+            width: 100%; height: 100%;
+            /* Gambar anime dark/sadis (pake URL high-res) */
+            background-image: url('https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=2000&auto=format&fit=crop'); 
+            background-size: cover; background-position: center;
+            filter: grayscale(80%) contrast(150%) brightness(0.3) sepia(50%) hue-rotate(320deg);
+            animation: breathe 10s infinite alternate ease-in-out;
+            transition: transform 0.1s ease-out;
+        }
+        
+        /* Efek Glow Merah Darah */
+        .blood-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, transparent 30%, rgba(255,0,60,0.15) 100%);
+            z-index: -1; pointer-events: none; animation: pulse 4s infinite alternate;
+        }
+
+        @keyframes breathe {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* CONTAINER UTAMA */
+        .container { 
+            width: 100%; max-width: 500px; background: var(--surface);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--border); border-radius: 4px;
+            padding: 30px; position: relative; z-index: 10;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,0,60,0.1);
+            transform-style: preserve-3d; transition: transform 0.1s ease-out;
+            max-height: 95vh; overflow-y: auto;
+        }
+
+        /* SCROLLBAR CUSTOM */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+
+        /* HEADER */
+        header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        header h1 { 
+            font-family: 'Cinzel', serif; font-size: 28px; font-weight: 900; color: var(--primary);
+            text-transform: uppercase; letter-spacing: 4px; text-shadow: 0 0 20px var(--primary-glow);
+        }
+        header p { font-size: 12px; color: var(--text-muted); margin-top: 5px; letter-spacing: 2px; }
+
+        /* FORM INPUTS */
+        .input-group { margin-bottom: 15px; transform: translateZ(20px); }
+        .input-group label { display: block; font-size: 11px; color: var(--primary); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%; background: rgba(0,0,0,0.8); border: 1px solid #333;
+            padding: 12px; color: #fff; font-family: 'Share Tech Mono', monospace;
+            outline: none; transition: 0.3s; border-left: 2px solid var(--primary);
+        }
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus { 
+            border-color: var(--primary); box-shadow: 0 0 10px rgba(255,0,60,0.3); 
+        }
+        .input-group textarea { height: 80px; resize: none; }
+
+        /* BUTTON */
+        .btn-execute {
+            width: 100%; padding: 15px; margin-top: 10px;
+            background: transparent; color: var(--primary);
+            border: 1px solid var(--primary); font-family: 'Cinzel', serif; font-weight: 700; font-size: 16px;
+            text-transform: uppercase; letter-spacing: 3px; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 0 15px rgba(255,0,60,0.2), inset 0 0 10px rgba(255,0,60,0.1);
+            transform: translateZ(30px);
+        }
+        .btn-execute:hover { 
+            background: var(--primary); color: #000; 
+            box-shadow: 0 0 30px var(--primary-glow), inset 0 0 20px rgba(255,0,60,0.5);
+        }
+        .btn-execute:disabled { border-color: #333; color: #555; box-shadow: none; cursor: not-allowed; background: transparent; }
+
+        /* TERMINAL */
+        .terminal { 
+            background: rgba(0,0,0,0.9); border: 1px solid #222; padding: 15px;
+            font-family: 'Share Tech Mono', monospace; font-size: 12px; height: 150px;
+            overflow-y: auto; color: #00fa7e; margin-top: 20px; line-height: 1.4;
+            box-shadow: inset 0 0 15px rgba(0,0,0,1);
+        }
+        .terminal .log-error { color: var(--primary); }
+        .terminal .log-success { color: #00ffcc; }
+    </style>
+</head>
+<body>
+
+    <div class="bg-container">
+        <div class="bg-anime" id="bgAnime"></div>
+    </div>
+    <div class="blood-overlay"></div>
+
+    <div class="container" id="mainContainer">
+        <header>
+            <h1>Mass Report</h1>
+            <p>Oblivion MTProto Engine</p>
+        </header>
+
+        <div class="input-group">
+            <label>Target Link (t.me/username)</label>
+            <input type="text" id="target" placeholder="https://t.me/username" value="https://t.me/telegram">
+        </div>
+
+        <div class="input-group">
+            <label>API ID</label>
+            <input type="text" id="apiId" placeholder="1234567">
+        </div>
+
+        <div class="input-group">
+            <label>API HASH</label>
+            <input type="password" id="apiHash" placeholder="0123456789abcdef...">
+        </div>
+
+        <div class="input-group">
+            <label>Session Pool (1 baris = 1 akun)</label>
+            <textarea id="sessions" placeholder="1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2...&#10;2BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2..."></textarea>
+        </div>
+
+        <div class="input-group">
+            <label>Alasan Report</label>
+            <select id="reasonType">
+                <option value="child_abuse">Child Abuse (Fatal)</option>
+                <option value="pornography">Pornography / VCS</option>
+                <option value="spam">Spam / Scam</option>
+                <option value="violence">Violence / Terror</option>
+                <option value="copyright">Copyright</option>
+            </select>
+        </div>
+
+        <button class="btn-execute" id="execBtn" onclick="startReport()">EXECUTE</button>
+
+        <div class="terminal" id="terminal">
+            <div>[System] Waiting for parameters...</div>
+        </div>
+    </div>
+
+    <script>
+        // --- EFEK 3D PARALLAX (Mouse & Touch) ---
+        function applyParallax(x, y) {
+            const xAxis = (window.innerWidth / 2 - x) / 25;
+            const yAxis = (window.innerHeight / 2 - y) / 25;
+            
+            document.getElementById('bgAnime').style.transform = `scale(1.05) translate(${xAxis}px, ${yAxis}px)`;
+            document.getElementById('mainContainer').style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        }
+
+        document.addEventListener('mousemove', (e) => applyParallax(e.pageX, e.pageY));
+        document.addEventListener('touchmove', (e) => {
+            if(e.touches.length > 0) applyParallax(e.touches[0].pageX, e.touches[0].pageY);
+        }, { passive: true });
+
+        // --- LOGIC REPORT ---
+        let isReporting = false;
+
+        function log(msg, type = 'info') {
+            const t = document.getElementById('terminal');
+            const c = type === 'success' ? 'log-success' : (type === 'error' ? 'log-error' : '');
+            t.innerHTML += `<div class="${c}">> ${msg}</div>`;
+            t.scrollTop = t.scrollHeight;
+        }
+
+        async function startReport() {
+            if (isReporting) return;
+
+            const target = document.getElementById('target').value.trim();
+            const apiId = document.getElementById('apiId').value.trim();
+            const apiHash = document.getElementById('apiHash').value.trim();
+            const sessionsRaw = document.getElementById('sessions').value.trim();
+            const reasonType = document.getElementById('reasonType').value;
+
+            if (!target || !apiId || !apiHash || !sessionsRaw) {
+                alert('Isi semua data dulu, gng!');
+                return;
+            }
+
+            // Split session by enter, remove empty lines
+            const sessionList = sessionsRaw.split(/\r?\n/).map(s => s.trim()).filter(s => s.length > 0);
+            
+            isReporting = true;
+            const btn = document.getElementById('execBtn');
+            btn.disabled = true;
+            btn.innerText = 'EXECUTING...';
+            document.getElementById('terminal').innerHTML = '';
+
+            log(`Initiating strike on: ${target}`, 'success');
+            log(`Loaded ${sessionList.length} senders from pool.`);
+            
+            let successCount = 0;
+            let failCount = 0;
+
+            for (let i = 0; i < sessionList.length; i++) {
+                log(`[Sender ${i+1}/${sessionList.length}] Firing report...`);
+                
+                try {
+                    // Tembak API Vercel
+                    const res = await fetch('/api/report', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            target, 
+                            apiId, 
+                            apiHash, 
+                            session: sessionList[i], 
+                            reasonType,
+                            message: "This account is distributing illegal content."
+                        })
+                    });
+                    
+                    const data = await res.json();
+                    
+                    if (data.success) {
+                        successCount++;
+                        log(`[Sender ${i+1}] Hit confirmed.`, 'success');
+                    } else {
+                        failCount++;
+                        log(`[Sender ${i+1}] Failed: ${data.error}`, 'error');
+                    }
+                } catch (err) {
+                    failCount++;
+                    log(`[Sender ${i+1}] Network error.`, 'error');
+                }
+
+                // Jeda 2 detik biar Vercel gak timeout (Serverless limit 10s)
+                // Dan biar gak kena spam-flag instan dari Telegram
+                await new Promise(r => setTimeout(r, 2000));
+            }
+
+            log(`=== OPERATION COMPLETE ===`, 'success');
+            log(`Hits: ${successCount} | Misses: ${failCount}`);
+            
+            isReporting = false;
+            btn.disabled = false;
+            btn.innerText = 'EXECUTE';
+        }
+    </script>
+</body>
+              </html>
