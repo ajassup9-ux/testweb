@@ -3,188 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>REPORT TELEGRAM - OBLIVION</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>REPORT TELEGRAM NEW FITUR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #020202; --surface: rgba(10, 5, 5, 0.85);
-            --primary: #ff003c; --primary-glow: rgba(255, 0, 60, 0.6);
-            --text: #e0e0e0; --text-muted: #888; --border: rgba(255, 0, 60, 0.3);
+            --bg: #050505; --surface: rgba(20, 25, 35, 0.85);
+            --primary: #00fa7e; --text: #ffffff; --text-muted: #8a9bb0;
+            --border: rgba(255, 255, 255, 0.1); --danger: #ff3333;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; overflow-x: hidden; }
         
-        body { 
-            background-color: var(--bg); color: var(--text); font-family: 'Share Tech Mono', monospace; 
-            min-height: 100vh; display: flex; justify-content: center; align-items: center; 
-            overflow: hidden; perspective: 1000px;
-        }
-
-        /* BACKGROUND ANIME 3D PARALLAX */
-        .bg-container {
+        /* BACKGROUND VAN GOGH ANIMASI */
+        .bg-image {
             position: fixed; top: -5%; left: -5%; width: 110%; height: 110%;
-            z-index: -2; overflow: hidden; pointer-events: none;
-        }
-        .bg-anime {
-            width: 100%; height: 100%;
-            /* Gambar anime dark/sadis (pake URL high-res) */
-            background-image: url('https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=2000&auto=format&fit=crop'); 
+            background-image: url('https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=2000&auto=format&fit=crop');
             background-size: cover; background-position: center;
-            filter: grayscale(80%) contrast(150%) brightness(0.3) sepia(50%) hue-rotate(320deg);
-            animation: breathe 10s infinite alternate ease-in-out;
-            transition: transform 0.1s ease-out;
+            opacity: 0.25; z-index: -2; filter: grayscale(80%) contrast(150%) brightness(0.5);
+            animation: floatBg 15s infinite alternate ease-in-out;
         }
+        .bg-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, transparent 0%, #000 100%); z-index: -1; opacity: 0.8; }
+        @keyframes floatBg { 0% { transform: scale(1) translate(0,0); } 100% { transform: scale(1.05) translate(-20px, -20px); } }
+
+        /* CONTAINER HP */
+        .app-container { width: 100%; max-width: 480px; background: var(--bg); min-height: 100vh; position: relative; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
         
-        /* Efek Glow Merah Darah */
-        .blood-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, transparent 30%, rgba(255,0,60,0.15) 100%);
-            z-index: -1; pointer-events: none; animation: pulse 4s infinite alternate;
-        }
+        /* HEADER CHAT */
+        .chat-header { display: flex; align-items: center; padding: 15px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--border); }
+        .chat-header .back-btn { width: 32px; height: 32px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; margin-right: 12px; font-size: 18px; color: #fff; }
+        .chat-header .avatar { width: 40px; height: 40px; border-radius: 50%; background: #2a2a2a url('https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=100&auto=format&fit=crop') center/cover; margin-right: 12px; border: 2px solid #333; }
+        .chat-header .title { font-weight: 700; font-size: 15px; }
+        .chat-header .sub { font-size: 12px; color: var(--text-muted); }
 
-        @keyframes breathe {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.05); }
-        }
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
+        /* CHAT BUBBLE */
+        .chat-content { padding: 20px 15px 80px 15px; }
+        .bubble { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; font-size: 14px; line-height: 1.5; color: #e0e0e0; animation: fadeIn 0.3s ease-out; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .bubble strong { color: var(--primary); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .profile-stats { display: flex; flex-direction: column; gap: 6px; font-family: monospace; font-size: 13px; margin-top: 10px; }
+        .profile-stats div { display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; }
+        .profile-stats span:last-child { color: var(--primary); font-weight: 700; }
 
-        /* CONTAINER UTAMA */
-        .container { 
-            width: 100%; max-width: 500px; background: var(--surface);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid var(--border); border-radius: 4px;
-            padding: 30px; position: relative; z-index: 10;
-            box-shadow: 0 0 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,0,60,0.1);
-            transform-style: preserve-3d; transition: transform 0.1s ease-out;
-            max-height: 95vh; overflow-y: auto;
-        }
+        /* TOMBOL MENU (INLINE KEYBOARD) */
+        .menu-buttons { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .btn-menu { background: rgba(30, 35, 45, 0.9); border: 1px solid #333; padding: 12px; border-radius: 8px; color: #fff; text-align: left; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .btn-menu:hover { background: rgba(50, 60, 75, 0.9); border-color: var(--primary); transform: scale(1.02); }
+        .btn-menu.full { grid-column: span 2; justify-content: center; }
+        .btn-back { background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; margin-top: 10px; align-self: center; }
 
-        /* SCROLLBAR CUSTOM */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
-
-        /* HEADER */
-        header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
-        header h1 { 
-            font-family: 'Cinzel', serif; font-size: 28px; font-weight: 900; color: var(--primary);
-            text-transform: uppercase; letter-spacing: 4px; text-shadow: 0 0 20px var(--primary-glow);
-        }
-        header p { font-size: 12px; color: var(--text-muted); margin-top: 5px; letter-spacing: 2px; }
-
-        /* FORM INPUTS */
-        .input-group { margin-bottom: 15px; transform: translateZ(20px); }
-        .input-group label { display: block; font-size: 11px; color: var(--primary); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
-        .input-group input, .input-group textarea, .input-group select {
-            width: 100%; background: rgba(0,0,0,0.8); border: 1px solid #333;
-            padding: 12px; color: #fff; font-family: 'Share Tech Mono', monospace;
-            outline: none; transition: 0.3s; border-left: 2px solid var(--primary);
-        }
-        .input-group input:focus, .input-group textarea:focus, .input-group select:focus { 
-            border-color: var(--primary); box-shadow: 0 0 10px rgba(255,0,60,0.3); 
-        }
-        .input-group textarea { height: 80px; resize: none; }
-
-        /* BUTTON */
-        .btn-execute {
-            width: 100%; padding: 15px; margin-top: 10px;
-            background: transparent; color: var(--primary);
-            border: 1px solid var(--primary); font-family: 'Cinzel', serif; font-weight: 700; font-size: 16px;
-            text-transform: uppercase; letter-spacing: 3px; cursor: pointer; transition: 0.3s;
-            box-shadow: 0 0 15px rgba(255,0,60,0.2), inset 0 0 10px rgba(255,0,60,0.1);
-            transform: translateZ(30px);
-        }
-        .btn-execute:hover { 
-            background: var(--primary); color: #000; 
-            box-shadow: 0 0 30px var(--primary-glow), inset 0 0 20px rgba(255,0,60,0.5);
-        }
-        .btn-execute:disabled { border-color: #333; color: #555; box-shadow: none; cursor: not-allowed; background: transparent; }
-
-        /* TERMINAL */
-        .terminal { 
-            background: rgba(0,0,0,0.9); border: 1px solid #222; padding: 15px;
-            font-family: 'Share Tech Mono', monospace; font-size: 12px; height: 150px;
-            overflow-y: auto; color: #00fa7e; margin-top: 20px; line-height: 1.4;
-            box-shadow: inset 0 0 15px rgba(0,0,0,1);
-        }
-        .terminal .log-error { color: var(--primary); }
-        .terminal .log-success { color: #00ffcc; }
+        /* FORM INPUT */
+        .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+        .form-group label { font-size: 12px; color: var(--primary); font-weight: 600; }
+        .form-group input, .form-group textarea { width: 100%; background: #000; border: 1px solid #444; padding: 10px; border-radius: 6px; color: #fff; font-family: monospace; font-size: 13px; outline: none; }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); }
+        
+        .btn-execute { width: 100%; background: var(--primary); color: #000; border: none; padding: 14px; border-radius: 8px; font-weight: 800; font-size: 14px; cursor: pointer; margin-top: 10px; text-transform: uppercase; }
+        .btn-execute:disabled { background: #333; color: #888; cursor: not-allowed; }
+        
+        .terminal { background: #000; border: 1px solid #222; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 11px; height: 150px; overflow-y: auto; color: #00fa7e; margin-top: 15px; }
+        .terminal .err { color: var(--danger); }
+        
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div class="bg-container">
-        <div class="bg-anime" id="bgAnime"></div>
-    </div>
-    <div class="blood-overlay"></div>
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
 
-    <div class="container" id="mainContainer">
-        <header>
-            <h1>Mass Report</h1>
-            <p>Oblivion MTProto Engine</p>
-        </header>
-
-        <div class="input-group">
-            <label>Target Link (t.me/username)</label>
-            <input type="text" id="target" placeholder="https://t.me/username" value="https://t.me/telegram">
+    <div class="app-container">
+        <!-- HEADER -->
+        <div class="chat-header">
+            <div class="back-btn" id="backBtn" onclick="goBack()" style="display: none;">←</div>
+            <div class="avatar"></div>
+            <div>
+                <div class="title">REPORT TELEGRAM NEW FITUR</div>
+                <div class="sub" id="headerSub">bot</div>
+            </div>
         </div>
 
-        <div class="input-group">
-            <label>API ID</label>
-            <input type="text" id="apiId" placeholder="1234567">
-        </div>
+        <div class="chat-content">
+            <!-- ================= SCREEN 1: MAIN MENU ================= -->
+            <div id="screen-main">
+                <div class="bubble">
+                    👋 Hai, merry christmas, please don't call!<br>Selamat datang di Reports News.
+                </div>
+                <div class="bubble">
+                    <strong>📊 PROFIL ANDA</strong>
+                    <div class="profile-stats">
+                        <div><span>🆔 ID</span> <span>933607039</span></div>
+                        <div><span>👑 Akses</span> <span>Owner</span></div>
+                        <div><span>📅 Masa Aktif</span> <span>∞ Permanen</span></div>
+                        <div><span>🇮🇩 Limit Harian</span> <span>10/∞</span></div>
+                        <div><span>🔒 Sender Private</span> <span id="uiSenderCount">0</span></div>
+                        <div><span>🌐 Pool Public</span> <span>10 akun</span></div>
+                        <div><span>📧 SMTP Milik</span> <span>0</span></div>
+                        <div><span>📈 Total Report</span> <span>3052</span></div>
+                    </div>
+                </div>
 
-        <div class="input-group">
-            <label>API HASH</label>
-            <input type="password" id="apiHash" placeholder="0123456789abcdef...">
-        </div>
+                <div class="bubble" style="padding: 10px; text-align: center; color: var(--text-muted); font-size: 12px;">
+                    _Silakan pilih menu:_
+                </div>
 
-        <div class="input-group">
-            <label>Session Pool (1 baris = 1 akun)</label>
-            <textarea id="sessions" placeholder="1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2...&#10;2BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2..."></textarea>
-        </div>
+                <div class="menu-buttons">
+                    <button class="btn-menu full" onclick="nav('report-menu')">📋 Report Menu (7 Fitur)</button>
+                    <button class="btn-menu full" onclick="nav('manage-sender')">📁 Manage Sender & SMTP</button>
+                    <div class="menu-grid">
+                        <button class="btn-menu">🎯 Saved Target</button>
+                        <button class="btn-menu">📜 History</button>
+                        <button class="btn-menu">📊 Limit Saya</button>
+                        <button class="btn-menu">🏆 Leaderboard</button>
+                    </div>
+                    <button class="btn-menu full" style="color: var(--danger);">❓ Panduan & Keterangan</button>
+                    <button class="btn-menu full" style="background: rgba(255, 215, 0, 0.1); border-color: gold; color: gold;">👑 OWNER PANEL</button>
+                </div>
+            </div>
 
-        <div class="input-group">
-            <label>Alasan Report</label>
-            <select id="reasonType">
-                <option value="child_abuse">Child Abuse (Fatal)</option>
-                <option value="pornography">Pornography / VCS</option>
-                <option value="spam">Spam / Scam</option>
-                <option value="violence">Violence / Terror</option>
-                <option value="copyright">Copyright</option>
-            </select>
-        </div>
+            <!-- ================= SCREEN 2: REPORT MENU ================= -->
+            <div id="screen-report-menu" class="hidden">
+                <div class="bubble">
+                    <strong>📋 REPORT MENU — 7 FITUR PELAPORAN</strong><br>
+                    ⭐ Akses Anda: 👑 Owner
+                </div>
+                <div class="menu-buttons">
+                    <button class="btn-menu full" onclick="nav('mtproto-mode')">🚀 1. Report MTProto (User, Bot, Channel, Group)</button>
+                    <button class="btn-menu full">📧 2. Report via Email</button>
+                    <button class="btn-menu full">📸 3. Report Foto Profil</button>
+                    <button class="btn-menu full" onclick="nav('report-story')">📖 4. Report Story</button>
+                    <button class="btn-menu full">🛡️ 5. Report @notoscam</button>
+                    <button class="btn-menu full">🔥 6. Kirim Reaction (30 Emoji)</button>
+                    <button class="btn-menu full">⏰ 7. Scheduled Report</button>
+                </div>
+            </div>
 
-        <button class="btn-execute" id="execBtn" onclick="startReport()">EXECUTE</button>
+            <!-- ================= SCREEN 3: MTPROTO MODE ================= -->
+            <div id="screen-mtproto-mode" class="hidden">
+                <div class="bubble">
+                    <strong>🚀 1. REPORT MTPROTO — PILIH MODE SENDER</strong><br><br>
+                    🔒 Private — Sender milik Anda sendiri<br>
+                    🌐 Public — Pool bersama<br>
+                    🎯 Gabungan — Private + Public
+                </div>
+                <div class="menu-buttons">
+                    <button class="btn-menu full" onclick="nav('mtproto-target')">🔒 Private (Milik Anda Sendiri)</button>
+                    <button class="btn-menu full">🌐 Public (Pool Bersama)</button>
+                    <button class="btn-menu full">🎯 Gabungan (ALL ACCESS)</button>
+                </div>
+            </div>
 
-        <div class="terminal" id="terminal">
-            <div>[System] Waiting for parameters...</div>
+            <!-- ================= SCREEN 4: TARGET TYPE ================= -->
+            <div id="screen-mtproto-target" class="hidden">
+                <div class="bubble">
+                    <strong>✅ Mode: 🔒 Private</strong><br><br>
+                    📌 Pilih Tipe Target:
+                </div>
+                <div class="menu-grid">
+                    <button class="btn-menu" onclick="nav('execute-form')">👤 Akun/Profil</button>
+                    <button class="btn-menu" onclick="nav('execute-form')">🤖 Bot User</button>
+                    <button class="btn-menu" onclick="nav('execute-form')">📢 Channel</button>
+                    <button class="btn-menu" onclick="nav('execute-form')">👥 Group</button>
+                    <button class="btn-menu full" onclick="nav('execute-form')">💬 Link Pesan</button>
+                </div>
+            </div>
+
+            <!-- ================= SCREEN 5: EXECUTE FORM ================= -->
+            <div id="screen-execute-form" class="hidden">
+                <div class="bubble">
+                    <strong>📢 CHANNEL PUBLIC</strong><br>
+                    Format: <br>• @channel_name<br>• https://t.me/channel_name<br>
+                    <br>Silakan isi target dan API config di bawah:
+                </div>
+                
+                <div class="bubble">
+                    <div class="form-group">
+                        <label>Target (Link/Username)</label>
+                        <input type="text" id="targetInput" placeholder="https://t.me/username">
+                    </div>
+                    <div class="form-group">
+                        <label>API ID</label>
+                        <input type="text" id="apiId" placeholder="1234567">
+                    </div>
+                    <div class="form-group">
+                        <label>API HASH</label>
+                        <input type="password" id="apiHash" placeholder="0123456789abcdef...">
+                    </div>
+                    <div class="form-group">
+                        <label>Alasan Report</label>
+                        <select id="reasonType" style="width:100%; background:#000; border:1px solid #444; padding:10px; border-radius:6px; color:#fff; outline:none;">
+                            <option value="child_abuse">Child Abuse (Fatal)</option>
+                            <option value="pornography">Pornography / VCS</option>
+                            <option value="spam">Spam / Scam</option>
+                            <option value="violence">Violence / Terror</option>
+                        </select>
+                    </div>
+                    <button class="btn-execute" id="execBtn" onclick="startReport()">EXECUTE REPORT</button>
+                    <div class="terminal" id="terminal">
+                        <div>[System] Siap mengeksekusi...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= SCREEN 6: MANAGE SENDER (ADD +62) ================= -->
+            <div id="screen-manage-sender" class="hidden">
+                <div class="bubble">
+                    <strong>📁 MANAGE SENDER (MILIK ANDA)</strong><br><br>
+                    Masukkan String Session akun Telegram Anda di sini. Anda bisa menambahkan nomor dari berbagai negara (+62, 62, +7, dll). <br><br>
+                    <i>Format: Satu baris satu session.</i>
+                </div>
+                
+                <div class="bubble">
+                    <div class="form-group">
+                        <label>Daftar String Session (Termasuk +62 / 62)</label>
+                        <textarea id="senderSessions" rows="6" placeholder="1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2...&#10;2BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2..."></textarea>
+                    </div>
+                    <button class="btn-execute" onclick="saveSenders()">SIMPAN SENDER</button>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
-        // --- EFEK 3D PARALLAX (Mouse & Touch) ---
-        function applyParallax(x, y) {
-            const xAxis = (window.innerWidth / 2 - x) / 25;
-            const yAxis = (window.innerHeight / 2 - y) / 25;
+        // --- NAVIGATION LOGIC ---
+        const screens = ['main', 'report-menu', 'mtproto-mode', 'mtproto-target', 'execute-form', 'manage-sender', 'report-story'];
+        let historyStack = [];
+
+        function nav(screenId) {
+            document.querySelectorAll('.chat-content > div').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`screen-${screenId}`).classList.remove('hidden');
             
-            document.getElementById('bgAnime').style.transform = `scale(1.05) translate(${xAxis}px, ${yAxis}px)`;
-            document.getElementById('mainContainer').style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+            historyStack.push(screenId);
+            document.getElementById('backBtn').style.display = 'flex';
+            document.getElementById('headerSub').innerText = screenId.replace('-', ' ').toUpperCase();
         }
 
-        document.addEventListener('mousemove', (e) => applyParallax(e.pageX, e.pageY));
-        document.addEventListener('touchmove', (e) => {
-            if(e.touches.length > 0) applyParallax(e.touches[0].pageX, e.touches[0].pageY);
-        }, { passive: true });
+        function goBack() {
+            historyStack.pop();
+            if (historyStack.length === 0) {
+                document.querySelectorAll('.chat-content > div').forEach(el => el.classList.add('hidden'));
+                document.getElementById('screen-main').classList.remove('hidden');
+                document.getElementById('backBtn').style.display = 'none';
+                document.getElementById('headerSub').innerText = 'bot';
+            } else {
+                const prevScreen = historyStack[historyStack.length - 1];
+                document.querySelectorAll('.chat-content > div').forEach(el => el.classList.add('hidden'));
+                document.getElementById(`screen-${prevScreen}`).classList.remove('hidden');
+            }
+        }
 
-        // --- LOGIC REPORT ---
+        // --- SENDER MANAGEMENT ---
+        let savedSessions = [];
+
+        function saveSenders() {
+            const raw = document.getElementById('senderSessions').value;
+            const list = raw.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+            
+            if(list.length === 0) {
+                alert("Isi String Session dulu, gng!");
+                return;
+            }
+
+            savedSessions = list; // Simpen di memori browser
+            document.getElementById('uiSenderCount').innerText = savedSessions.length;
+            alert(`Berhasil menyimpan ${savedSessions.length} akun sender!`);
+            goBack();
+        }
+
+        // --- REPORT EXECUTION ---
         let isReporting = false;
 
         function log(msg, type = 'info') {
             const t = document.getElementById('terminal');
-            const c = type === 'success' ? 'log-success' : (type === 'error' ? 'log-error' : '');
+            const c = type === 'error' ? 'err' : '';
             t.innerHTML += `<div class="${c}">> ${msg}</div>`;
             t.scrollTop = t.scrollHeight;
         }
@@ -192,37 +285,36 @@
         async function startReport() {
             if (isReporting) return;
 
-            const target = document.getElementById('target').value.trim();
+            const target = document.getElementById('targetInput').value.trim();
             const apiId = document.getElementById('apiId').value.trim();
             const apiHash = document.getElementById('apiHash').value.trim();
-            const sessionsRaw = document.getElementById('sessions').value.trim();
             const reasonType = document.getElementById('reasonType').value;
 
-            if (!target || !apiId || !apiHash || !sessionsRaw) {
+            if (!target || !apiId || !apiHash) {
                 alert('Isi semua data dulu, gng!');
                 return;
             }
 
-            // Split session by enter, remove empty lines
-            const sessionList = sessionsRaw.split(/\r?\n/).map(s => s.trim()).filter(s => s.length > 0);
-            
+            if (savedSessions.length === 0) {
+                alert('Session Pool kosong! Balik ke menu Manage Sender dan simpan session dulu.');
+                return;
+            }
+
             isReporting = true;
             const btn = document.getElementById('execBtn');
             btn.disabled = true;
             btn.innerText = 'EXECUTING...';
             document.getElementById('terminal').innerHTML = '';
 
-            log(`Initiating strike on: ${target}`, 'success');
-            log(`Loaded ${sessionList.length} senders from pool.`);
+            log(`Target: ${target} | Senders: ${savedSessions.length}`);
             
             let successCount = 0;
             let failCount = 0;
 
-            for (let i = 0; i < sessionList.length; i++) {
-                log(`[Sender ${i+1}/${sessionList.length}] Firing report...`);
+            for (let i = 0; i < savedSessions.length; i++) {
+                log(`[Sender ${i+1}/${savedSessions.length}] Menembak report...`);
                 
                 try {
-                    // Tembak API Vercel
                     const res = await fetch('/api/report', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -230,9 +322,9 @@
                             target, 
                             apiId, 
                             apiHash, 
-                            session: sessionList[i], 
+                            session: savedSessions[i], 
                             reasonType,
-                            message: "This account is distributing illegal content."
+                            message: "This account violates ToS."
                         })
                     });
                     
@@ -240,28 +332,26 @@
                     
                     if (data.success) {
                         successCount++;
-                        log(`[Sender ${i+1}] Hit confirmed.`, 'success');
+                        log(`[Sender ${i+1}] Sukses!`, 'success');
                     } else {
                         failCount++;
-                        log(`[Sender ${i+1}] Failed: ${data.error}`, 'error');
+                        log(`[Sender ${i+1}] Gagal: ${data.error}`, 'error');
                     }
                 } catch (err) {
                     failCount++;
-                    log(`[Sender ${i+1}] Network error.`, 'error');
+                    log(`[Sender ${i+1}] Error Vercel.`, 'error');
                 }
 
-                // Jeda 2 detik biar Vercel gak timeout (Serverless limit 10s)
-                // Dan biar gak kena spam-flag instan dari Telegram
                 await new Promise(r => setTimeout(r, 2000));
             }
 
-            log(`=== OPERATION COMPLETE ===`, 'success');
-            log(`Hits: ${successCount} | Misses: ${failCount}`);
+            log(`=== OPERASI SELESAI ===`);
+            log(`Sukses: ${successCount} | Gagal: ${failCount}`);
             
             isReporting = false;
             btn.disabled = false;
-            btn.innerText = 'EXECUTE';
+            btn.innerText = 'EXECUTE REPORT';
         }
     </script>
 </body>
-              </html>
+                            </html>
