@@ -20,51 +20,64 @@ module.exports = async function handler(req, res) {
         const authorData = videoData.author || {};
 
         let foundLinks = new Set();
-        let keywordsData = new Set(); // Pake Set biar gak duplikat
+        let keywordsData = new Set();
+        let rawDebug = []; // Buat nampilin isi asli komen (buat ngecek API nipu apa nggak)
 
-        // REGEX SUPER LEBAR: Nangkep link alightcreative/alightmotion dalam kondisi apapun
-        const urlRegex = /(https?:\/\/(?:www\.)?(?:alightcreative|alightmotion)\.com\/[^\s"']+)/gi;
-        const keywordRegex = /(preset|xml|5mb|5gb|alight)/i;
+        // REGEX BARU: Nangkep link alightcreative walau tanpa https://
+        const urlRegex = /(?:https?:\/\/)?(?:www\.)?(?:alightcreative|alightmotion)\.com\/(?:am\/share\/|p\/)[a-zA-Z0-9_\-\/]+/gi;
+        // REGEX BARU: Cuma nangkep yang emang ada embel-embel xml/5mb/5gb
+        const keywordRegex = /\b(?:xml|5mb|5gb|alightmotion|alightcreative)\b/i;
 
-        const addText = (text, type) => {
+        const processText = (text, type) => {
             if (!text) return;
-            const urls = text.match(urlRegex);
-            if (urls) urls.forEach(u => foundLinks.add(u));
             
+            // Cari Link
+            const urls = text.match(urlRegex);
+            if (urls) urls.forEach(u => {
+                // Bersihin tanda baca di ujung link
+                let cleanUrl = u.replace(/[.,;!?]+$/, '');
+                if (!cleanUrl.startsWith('http')) cleanUrl = 'https://' + cleanUrl;
+                foundLinks.add(cleanUrl);
+            });
+
+            // Cari Keyword (Kalo ketemu, masukin ke list)
             if (keywordRegex.test(text)) {
                 keywordsData.add(`[${type}] ${text}`);
             }
+            
+            // Simpen buat debug
+            if (text.includes('alight') || text.includes('xml') || text.includes('5mb')) {
+                rawDebug.push({ type, text });
+            }
         };
 
-        // 1. Scan Deskripsi Video
-        addText(videoData.title, 'Deskripsi');
+        // 1. Scan Deskripsi
+        processText(videoData.title, 'Deskripsi');
 
         let cursor = 0;
         let hasMore = true;
         let pages = 0;
 
         // 2. Loop Komen
-        while (hasMore && pages < 10 && (Date.now() - startTime < TIMEOUT_LIMIT)) {
+        while (hasMore && pages < 15 && (Date.now() - startTime < TIMEOUT_LIMIT)) {
             pages++;
             try {
                 const commentRes = await axios.get(`https://www.tikwm.com/api/comment/list/?url=${encodeURIComponent(url)}&count=50&cursor=${cursor}`, { timeout: 3000 });
                 const comments = commentRes.data.data?.comments || [];
 
                 for (const c of comments) {
-                    // Scan teks komen utama
-                    addText(c.text, 'Komentar');
+                    processText(c.text, 'Komentar');
 
-                    // 3. BONGKAR BALASAN (REPLY) - Kunci utamanya di sini!
-                    // Kita hajar terus selama ada reply_comment_total atau reply_id
+                    // 3. BONGKAR BALASAN (REPLY)
                     if ((c.reply_comment_total > 0 || c.reply_id) && (Date.now() - startTime < TIMEOUT_LIMIT)) {
                         try {
                             const replyRes = await axios.get(`https://www.tikwm.com/api/comment/reply/list/?url=${encodeURIComponent(url)}&cid=${c.cid}&count=50`, { timeout: 2500 });
                             const replies = replyRes.data.data?.comments || [];
                             
                             for (const r of replies) {
-                                addText(r.text, 'Balasan Komen');
+                                processText(r.text, 'Balasan Komen');
                             }
-                        } catch (e) { /* Skip jika gagal 1 reply */ }
+                        } catch (e) { /* Skip */ }
                     }
                 }
 
@@ -96,10 +109,10 @@ module.exports = async function handler(req, res) {
                 scanResult: {
                     links: Array.from(foundLinks),
                     keywords: Array.from(keywordsData).map(text => {
-                        // Pisahin tipe sama teksnya buat UI
-                        const match = text.match(/^\[(.*?)\] (.*)/);
+                        const match = text.match(/^\[(.*?)\] (.*)/s);
                         return { type: match ? match[1] : 'Teks', text: match ? match[2] : text };
-                    })
+                    }),
+                    debug: rawDebug // Tambahan buat ngecek API
                 }
             }
         });
