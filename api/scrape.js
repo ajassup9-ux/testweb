@@ -10,77 +10,61 @@ module.exports = async function handler(req, res) {
     if (!url) return res.status(400).json({ error: 'URL TikTok wajib diisi' });
 
     const startTime = Date.now();
-    const TIMEOUT_LIMIT = 8500; // 8.5 detik (Aman dari limit Vercel)
+    const TIMEOUT_LIMIT = 9000; // 9 detik batas aman Vercel
 
     try {
-        const videoRes = await axios.get(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`);
-        if (videoRes.data.code !== 0 || !videoRes.data.data) {
-            throw new Error('Video gak valid atau di-private.');
-        }
-        
+        const videoRes = await axios.get(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`, { timeout: 4000 });
+        if (videoRes.data.code !== 0 || !videoRes.data.data) throw new Error('Video gak valid.');
+
         const videoData = videoRes.data.data;
         const authorData = videoData.author || {};
 
-        // Set biar gak ada link duplikat
         let foundLinks = new Set();
-        let foundKeywords = new Set();
-        let keywordsData = []; // Nyimpen detail teks
+        let keywordsData = new Set(); // Pake Set biar gak duplikat
 
-        // REGEX DIPERBARUI: Nangkep link + kata xml, 5mb, 5gb
+        // REGEX SUPER LEBAR: Nangkep link alightcreative/alightmotion dalam kondisi apapun
         const urlRegex = /(https?:\/\/(?:www\.)?(?:alightcreative|alightmotion)\.com\/[^\s"']+)/gi;
-        const keywordRegex = /(preset\s*am|am\s*preset|preset\s*xml|xml\s*preset|preset\s*5mb|5mb\s*preset|am\s*xml|xml\s*am|\bxml\b|\b5mb\b|\b5gb\b)/i;
+        const keywordRegex = /(preset|xml|5mb|5gb|alight)/i;
 
-        // Scan Deskripsi Video
-        if (videoData.title) {
-            const descUrls = videoData.title.match(urlRegex);
-            if (descUrls) descUrls.forEach(u => foundLinks.add(u));
-            if (keywordRegex.test(videoData.title)) {
-                foundKeywords.add(videoData.title);
-                keywordsData.push({ text: videoData.title, type: 'Deskripsi Video' });
+        const addText = (text, type) => {
+            if (!text) return;
+            const urls = text.match(urlRegex);
+            if (urls) urls.forEach(u => foundLinks.add(u));
+            
+            if (keywordRegex.test(text)) {
+                keywordsData.add(`[${type}] ${text}`);
             }
-        }
+        };
+
+        // 1. Scan Deskripsi Video
+        addText(videoData.title, 'Deskripsi');
 
         let cursor = 0;
         let hasMore = true;
         let pages = 0;
 
-        // LOOP LEBIH CEPET (50 komen per halaman)
-        while (hasMore && pages < 20 && (Date.now() - startTime < TIMEOUT_LIMIT)) {
+        // 2. Loop Komen
+        while (hasMore && pages < 10 && (Date.now() - startTime < TIMEOUT_LIMIT)) {
             pages++;
             try {
                 const commentRes = await axios.get(`https://www.tikwm.com/api/comment/list/?url=${encodeURIComponent(url)}&count=50&cursor=${cursor}`, { timeout: 3000 });
                 const comments = commentRes.data.data?.comments || [];
 
                 for (const c of comments) {
-                    const text = c.text || '';
-                    
-                    // Cek Komen Utama
-                    const urls = text.match(urlRegex);
-                    if (urls) urls.forEach(u => foundLinks.add(u));
-                    
-                    if (keywordRegex.test(text) && !foundKeywords.has(text)) {
-                        foundKeywords.add(text);
-                        keywordsData.push({ text, type: 'Komentar' });
-                    }
+                    // Scan teks komen utama
+                    addText(c.text, 'Komentar');
 
-                    // CEK BALASAN (REPLY) - Paksa cek kalau kreator atau ada reply
-                    const isCreator = c.user?.unique_id === authorData.unique_id;
-                    if (c.reply_comment_total > 0 || isCreator || c.reply_id) {
+                    // 3. BONGKAR BALASAN (REPLY) - Kunci utamanya di sini!
+                    // Kita hajar terus selama ada reply_comment_total atau reply_id
+                    if ((c.reply_comment_total > 0 || c.reply_id) && (Date.now() - startTime < TIMEOUT_LIMIT)) {
                         try {
-                            const replyRes = await axios.get(`https://www.tikwm.com/api/comment/reply/list/?url=${encodeURIComponent(url)}&cid=${c.cid}&count=50`, { timeout: 2000 });
+                            const replyRes = await axios.get(`https://www.tikwm.com/api/comment/reply/list/?url=${encodeURIComponent(url)}&cid=${c.cid}&count=50`, { timeout: 2500 });
                             const replies = replyRes.data.data?.comments || [];
                             
                             for (const r of replies) {
-                                const rText = r.text || '';
-                                const rUrls = rText.match(urlRegex);
-                                if (rUrls) rUrls.forEach(u => foundLinks.add(u));
-                                
-                                if (keywordRegex.test(rText) && !foundKeywords.has(rText)) {
-                                    foundKeywords.add(rText);
-                                    keywordsData.push({ text: rText, type: 'Balasan Komen' });
-                                }
+                                addText(r.text, 'Balasan Komen');
                             }
-                        } catch (e) { /* Skip error reply */ }
+                        } catch (e) { /* Skip jika gagal 1 reply */ }
                     }
                 }
 
@@ -110,8 +94,12 @@ module.exports = async function handler(req, res) {
                     }
                 },
                 scanResult: {
-                    links: Array.from(foundLinks), // Ubah Set jadi Array
-                    keywords: keywordsData
+                    links: Array.from(foundLinks),
+                    keywords: Array.from(keywordsData).map(text => {
+                        // Pisahin tipe sama teksnya buat UI
+                        const match = text.match(/^\[(.*?)\] (.*)/);
+                        return { type: match ? match[1] : 'Teks', text: match ? match[2] : text };
+                    })
                 }
             }
         });
