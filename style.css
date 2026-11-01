@@ -1,10 +1,10 @@
 :root {
     --bg: #050505;
-    --surface: rgba(255, 255, 255, 0.03);
+    --surface: rgba(10, 10, 15, 0.6); /* Lebih transparan biar video tembus */
     --primary: #00f3ff;
     --secondary: #bc13fe;
     --text: #e0e0e0;
-    --text-muted: #888;
+    --text-muted: #a0a0a0;
     --border: rgba(255, 255, 255, 0.1);
 }
 
@@ -18,21 +18,41 @@ body {
     line-height: 1.6;
 }
 
-/* BACKGROUND GLOW ORBS */
-.glow-orb {
+/* --- BACKGROUND VIDEO ANIME --- */
+.bg-video {
     position: fixed;
-    border-radius: 50%;
-    filter: blur(120px);
-    z-index: -1;
-    opacity: 0.4;
-    animation: float 10s infinite alternate ease-in-out;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    object-fit: cover;
+    z-index: -2;
+    filter: grayscale(50%) contrast(120%) brightness(0.4); /* Dibikin gelap & cinematic */
 }
-.orb-1 { width: 400px; height: 400px; background: var(--secondary); top: -100px; left: -100px; }
-.orb-2 { width: 300px; height: 300px; background: var(--primary); bottom: -50px; right: -50px; animation-delay: 2s; }
 
-@keyframes float {
-    0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(50px, 50px) scale(1.2); }
+/* Overlay gradient biar teks makin kebaca */
+.bg-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: linear-gradient(to bottom, rgba(5,5,5,0.7) 0%, rgba(5,5,5,0.4) 50%, rgba(5,5,5,0.9) 100%);
+    z-index: -1;
+}
+
+/* --- EFEK PARTIKEL NEON --- */
+.particles {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    background-image: radial-gradient(var(--primary) 1px, transparent 1px), radial-gradient(var(--secondary) 1px, transparent 1px);
+    background-size: 50px 50px, 100px 100px;
+    background-position: 0 0, 25px 25px;
+    opacity: 0.15;
+    animation: moveParticles 20s linear infinite;
+}
+
+@keyframes moveParticles {
+    0% { background-position: 0 0, 25px 25px; }
+    100% { background-position: 50px 50px, 125px 125px; }
 }
 
 /* NAVBAR */
@@ -57,13 +77,15 @@ nav {
 .hero {
     min-height: 100vh; display: flex; align-items: center; padding: 0 10%;
 }
-.hero-content { max-width: 800px; }
+.hero-content { max-width: 800px; animation: slideUp 1s ease-out; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
 .greeting { font-family: 'Fira Code', monospace; color: var(--primary); font-size: 16px; margin-bottom: 20px; }
-.name { font-size: clamp(3rem, 8vw, 6rem); font-weight: 700; line-height: 1.1; margin-bottom: 10px; color: #fff; text-shadow: 0 0 30px rgba(255,255,255,0.1); }
+.name { font-size: clamp(3rem, 8vw, 6rem); font-weight: 700; line-height: 1.1; margin-bottom: 10px; color: #fff; text-shadow: 0 0 30px rgba(255,255,255,0.2); }
 .role { font-size: clamp(1.5rem, 4vw, 3rem); color: var(--text-muted); margin-bottom: 25px; height: 1.2em; }
 .role::after { content: '|'; animation: blink 1s infinite; color: var(--primary); }
 @keyframes blink { 50% { opacity: 0; } }
-.desc { font-size: 18px; color: var(--text-muted); max-width: 600px; margin-bottom: 40px; }
+.desc { font-size: 18px; color: var(--text-muted); max-width: 600px; margin-bottom: 40px; text-shadow: 0 0 10px #000; }
 
 /* BUTTONS */
 .cta { display: flex; gap: 20px; }
@@ -76,22 +98,23 @@ nav {
     box-shadow: 0 0 15px rgba(0,243,255,0.4);
 }
 .btn.primary:hover { box-shadow: 0 0 25px var(--primary); transform: translateY(-3px); }
-.btn.outline { background: transparent; color: var(--primary); border: 1px solid var(--primary); }
+.btn.outline { background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); color: var(--primary); border: 1px solid var(--primary); }
 .btn.outline:hover { background: rgba(0,243,255,0.1); transform: translateY(-3px); }
 
 /* CONTAINER & SECTIONS */
 .container { padding: 100px 10%; max-width: 1200px; margin: 0 auto; }
 .section-title {
     font-family: 'Fira Code', monospace; font-size: 24px; color: #fff; margin-bottom: 40px;
-    display: flex; align-items: center; gap: 15px;
+    display: flex; align-items: center; gap: 15px; text-shadow: 0 0 10px #000;
 }
 .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
 /* GLASS CARD */
 .glass-card {
-    background: var(--surface); backdrop-filter: blur(10px);
+    background: var(--surface); backdrop-filter: blur(15px);
     border: 1px solid var(--border); padding: 40px; border-radius: 12px;
     font-size: 16px; color: #ccc; line-height: 1.8;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 .glass-card p { margin-bottom: 15px; }
 .glass-card strong { color: var(--primary); }
@@ -99,7 +122,8 @@ nav {
 /* SKILLS GRID */
 .skills-grid { display: flex; flex-wrap: wrap; gap: 15px; }
 .skill-tag {
-    background: rgba(0, 243, 255, 0.05); border: 1px solid rgba(0, 243, 255, 0.3);
+    background: rgba(5, 5, 5, 0.7); backdrop-filter: blur(5px);
+    border: 1px solid rgba(0, 243, 255, 0.3);
     color: var(--primary); padding: 10px 20px; border-radius: 5px;
     font-family: 'Fira Code', monospace; font-size: 14px; transition: 0.3s;
 }
@@ -108,12 +132,13 @@ nav {
 /* PROJECTS GRID */
 .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
 .project-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    background: var(--surface); backdrop-filter: blur(10px);
+    border: 1px solid var(--border); border-radius: 12px;
     overflow: hidden; transition: 0.4s ease;
 }
 .project-card:hover {
     transform: translateY(-10px); border-color: var(--secondary);
-    box-shadow: 0 10px 30px rgba(188, 19, 254, 0.2);
+    box-shadow: 0 10px 30px rgba(188, 19, 254, 0.3);
 }
 .project-img { height: 200px; background-size: cover; background-position: center; filter: grayscale(100%); transition: 0.4s; }
 .project-card:hover .project-img { filter: grayscale(0%); }
@@ -127,7 +152,7 @@ nav {
 }
 
 /* FOOTER */
-footer { text-align: center; padding: 40px 20px; border-top: 1px solid var(--border); font-family: 'Fira Code', monospace; }
+footer { text-align: center; padding: 40px 20px; border-top: 1px solid var(--border); font-family: 'Fira Code', monospace; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
 footer p { color: var(--text-muted); font-size: 14px; }
 footer .small { font-size: 12px; margin-top: 10px; opacity: 0.5; }
 
@@ -143,4 +168,4 @@ footer .small { font-size: 12px; margin-top: 10px; opacity: 0.5; }
     .cta { flex-direction: column; }
     .container { padding: 80px 5%; }
     .glass-card { padding: 25px; }
-                    }
+              }
