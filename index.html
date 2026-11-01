@@ -49,7 +49,7 @@
         .btn-download { flex: 1; text-align: center; background: var(--primary); color: #fff; padding: 10px; font-weight: bold; border-radius: 4px; text-decoration: none; font-size: 13px; }
         .btn-download.audio { background: transparent; border: 1px solid var(--secondary); color: var(--secondary); }
 
-        .preset-card { background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: 8px; display: none; }
+        .preset-card { background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: 8px; display: none; margin-bottom: 20px; }
         .preset-card h3 { font-family: 'Inter'; font-size: 18px; color: var(--secondary); margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
         
         .link-box { background: #000; border-left: 3px solid var(--primary); padding: 12px; border-radius: 4px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
@@ -59,6 +59,9 @@
         .keyword-box { background: #000; border-left: 3px solid #ffcc00; padding: 12px; border-radius: 4px; margin-bottom: 10px; font-size: 12px; line-height: 1.5; }
         .keyword-box .type { color: #ffcc00; font-size: 10px; font-weight: bold; display: block; margin-bottom: 4px; }
         .empty-state { color: #555; font-size: 13px; text-align: center; padding: 15px; }
+
+        /* DEBUG BOX */
+        .debug-card { background: #000; border: 1px dashed #555; padding: 15px; border-radius: 8px; display: none; color: #888; font-size: 11px; white-space: pre-wrap; word-wrap: break-word; }
     </style>
 </head>
 <body>
@@ -112,6 +115,11 @@
             <h3 style="margin-top: 20px;">🔍 Teks Menyebut Preset (<span id="countKeywords">0</span>)</h3>
             <div id="keywordsContainer"></div>
         </div>
+
+        <div class="debug-card" id="debugCard">
+            <strong>--- RAW API DEBUG (Komen yang ada kata alight/xml/5mb) ---</strong><br><br>
+            <div id="debugContent"></div>
+        </div>
     </div>
 
     <script>
@@ -131,12 +139,14 @@
             const errorBox = document.getElementById('errorBox');
             const videoCard = document.getElementById('videoCard');
             const presetCard = document.getElementById('presetCard');
+            const debugCard = document.getElementById('debugCard');
 
             btn.disabled = true; btn.innerText = 'SCANNING...';
             loader.style.display = 'block';
             errorBox.style.display = 'none';
             videoCard.style.display = 'none';
             presetCard.style.display = 'none';
+            debugCard.style.display = 'none';
 
             try {
                 const res = await fetch('/api/scrape', {
@@ -172,7 +182,7 @@
                     const linksContainer = document.getElementById('linksContainer');
                     linksContainer.innerHTML = '';
                     if (scanResult.links.length === 0) {
-                        linksContainer.innerHTML = '<div class="empty-state">Gak ada link Alight Motion di komentar.</div>';
+                        linksContainer.innerHTML = '<div class="empty-state">Gak ada link Alight Motion yang terekstrak.</div>';
                     } else {
                         scanResult.links.forEach(link => {
                             linksContainer.innerHTML += `
@@ -197,6 +207,16 @@
                                 </div>
                             `;
                         });
+                    }
+
+                    // Render Debug
+                    if (scanResult.debug && scanResult.debug.length > 0) {
+                        let debugHTML = '';
+                        scanResult.debug.forEach(d => {
+                            debugHTML += `<strong style="color:#ff0055;">[${d.type}]</strong>\n${d.text}\n\n`;
+                        });
+                        document.getElementById('debugContent').innerText = debugHTML;
+                        debugCard.style.display = 'block';
                     }
 
                     presetCard.style.display = 'block';
