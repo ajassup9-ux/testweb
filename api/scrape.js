@@ -10,7 +10,7 @@ module.exports = async function handler(req, res) {
     if (!url) return res.status(400).json({ error: 'URL TikTok wajib diisi' });
 
     const startTime = Date.now();
-    const TIMEOUT_LIMIT = 8000; 
+    const TIMEOUT_LIMIT = 8500; // 8.5 detik (Aman dari limit Vercel)
 
     try {
         const videoRes = await axios.get(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`);
@@ -19,69 +19,73 @@ module.exports = async function handler(req, res) {
         }
         
         const videoData = videoRes.data.data;
-        
-        // PENGAMAN: Kalau data author gak ada, pake default
         const authorData = videoData.author || {};
-        const statsData = videoData.play_count !== undefined ? videoData : {}; // fallback stats
 
-        let foundLinks = [];
-        let foundKeywords = [];
-        let cursor = 0;
-        let hasMore = true;
+        // Set biar gak ada link duplikat
+        let foundLinks = new Set();
+        let foundKeywords = new Set();
+        let keywordsData = []; // Nyimpen detail teks
 
-        const urlRegex = /(https?:\/\/(?:www\.)?(?:alightcreative|alightmotion)\.com\/[^\s]+)/gi;
-        const keywordRegex = /(preset\s*am|am\s*preset|preset\s*xml|xml\s*preset|preset\s*5mb|5mb\s*preset|am\s*xml|xml\s*am)/i;
+        // REGEX DIPERBARUI: Nangkep link + kata xml, 5mb, 5gb
+        const urlRegex = /(https?:\/\/(?:www\.)?(?:alightcreative|alightmotion)\.com\/[^\s"']+)/gi;
+        const keywordRegex = /(preset\s*am|am\s*preset|preset\s*xml|xml\s*preset|preset\s*5mb|5mb\s*preset|am\s*xml|xml\s*am|\bxml\b|\b5mb\b|\b5gb\b)/i;
 
+        // Scan Deskripsi Video
         if (videoData.title) {
             const descUrls = videoData.title.match(urlRegex);
-            if (descUrls) descUrls.forEach(u => foundLinks.push(u.replace(/[.,;!?]+$/, '')));
+            if (descUrls) descUrls.forEach(u => foundLinks.add(u));
             if (keywordRegex.test(videoData.title)) {
-                foundKeywords.push({ text: videoData.title, type: 'Deskripsi Video' });
+                foundKeywords.add(videoData.title);
+                keywordsData.push({ text: videoData.title, type: 'Deskripsi Video' });
             }
         }
 
+        let cursor = 0;
+        let hasMore = true;
         let pages = 0;
-        while (hasMore && pages < 50 && (Date.now() - startTime < TIMEOUT_LIMIT)) {
+
+        // LOOP LEBIH CEPET (50 komen per halaman)
+        while (hasMore && pages < 20 && (Date.now() - startTime < TIMEOUT_LIMIT)) {
             pages++;
             try {
-                const commentRes = await axios.get(`https://www.tikwm.com/api/comment/list/?url=${encodeURIComponent(url)}&count=20&cursor=${cursor}`, { timeout: 3000 });
-                
-                if (commentRes.data.code !== 0 || !commentRes.data.data || commentRes.data.data.comments.length === 0) break;
-
-                const comments = commentRes.data.data.comments;
+                const commentRes = await axios.get(`https://www.tikwm.com/api/comment/list/?url=${encodeURIComponent(url)}&count=50&cursor=${cursor}`, { timeout: 3000 });
+                const comments = commentRes.data.data?.comments || [];
 
                 for (const c of comments) {
                     const text = c.text || '';
+                    
+                    // Cek Komen Utama
                     const urls = text.match(urlRegex);
-                    if (urls) urls.forEach(u => {
-                        const clean = u.replace(/[.,;!?]+$/, '');
-                        if (!foundLinks.includes(clean)) foundLinks.push(clean);
-                    });
-                    if (keywordRegex.test(text) && !foundKeywords.some(k => k.text === text)) {
-                        foundKeywords.push({ text, type: 'Komentar' });
+                    if (urls) urls.forEach(u => foundLinks.add(u));
+                    
+                    if (keywordRegex.test(text) && !foundKeywords.has(text)) {
+                        foundKeywords.add(text);
+                        keywordsData.push({ text, type: 'Komentar' });
                     }
 
-                    if (c.reply_comment_total > 0 && (Date.now() - startTime < TIMEOUT_LIMIT)) {
+                    // CEK BALASAN (REPLY) - Paksa cek kalau kreator atau ada reply
+                    const isCreator = c.user?.unique_id === authorData.unique_id;
+                    if (c.reply_comment_total > 0 || isCreator || c.reply_id) {
                         try {
-                            const replyRes = await axios.get(`https://www.tikwm.com/api/comment/reply/list/?url=${encodeURIComponent(url)}&cid=${c.cid}&count=20`, { timeout: 2000 });
-                            if (replyRes.data.code === 0 && replyRes.data.data && replyRes.data.data.comments) {
-                                replyRes.data.data.comments.forEach(r => {
-                                    const rText = r.text || '';
-                                    const rUrls = rText.match(urlRegex);
-                                    if (rUrls) rUrls.forEach(u => {
-                                        const clean = u.replace(/[.,;!?]+$/, '');
-                                        if (!foundLinks.includes(clean)) foundLinks.push(clean);
-                                    });
-                                    if (keywordRegex.test(rText) && !foundKeywords.some(k => k.text === rText)) {
-                                        foundKeywords.push({ text: rText, type: 'Balasan Komen' });
-                                    }
-                                });
+                            const replyRes = await axios.get(`https://www.tikwm.com/api/comment/reply/list/?url=${encodeURIComponent(url)}&cid=${c.cid}&count=50`, { timeout: 2000 });
+                            const replies = replyRes.data.data?.comments || [];
+                            
+                            for (const r of replies) {
+                                const rText = r.text || '';
+                                const rUrls = rText.match(urlRegex);
+                                if (rUrls) rUrls.forEach(u => foundLinks.add(u));
+                                
+                                if (keywordRegex.test(rText) && !foundKeywords.has(rText)) {
+                                    foundKeywords.add(rText);
+                                    keywordsData.push({ text: rText, type: 'Balasan Komen' });
+                                }
                             }
-                        } catch (e) { }
+                        } catch (e) { /* Skip error reply */ }
                     }
                 }
-                cursor = commentRes.data.data.cursor;
-                hasMore = commentRes.data.data.has_more;
+
+                cursor = commentRes.data.data?.cursor;
+                hasMore = commentRes.data.data?.has_more;
             } catch (e) { break; }
         }
 
@@ -96,18 +100,18 @@ module.exports = async function handler(req, res) {
                     author: {
                         username: authorData.unique_id || 'unknown',
                         nickname: authorData.nickname || 'Unknown User',
-                        avatar: authorData.avatar || 'https://ui-avatars.com/api/?name=Unknown&background=random' // Fallback avatar
+                        avatar: authorData.avatar || 'https://ui-avatars.com/api/?name=U'
                     },
                     stats: {
-                        views: statsData.play_count || 0,
-                        likes: statsData.digg_count || 0,
-                        comments: statsData.comment_count || 0,
-                        shares: statsData.share_count || 0
+                        views: videoData.play_count || 0,
+                        likes: videoData.digg_count || 0,
+                        comments: videoData.comment_count || 0,
+                        shares: videoData.share_count || 0
                     }
                 },
                 scanResult: {
-                    links: foundLinks,
-                    keywords: foundKeywords
+                    links: Array.from(foundLinks), // Ubah Set jadi Array
+                    keywords: keywordsData
                 }
             }
         });
