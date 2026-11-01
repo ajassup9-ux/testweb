@@ -3,109 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>[Nama Lu] - Portfolio</title>
+    <title>TG DNA - Web Inspector</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <!-- BACKGROUND VIDEO ANIME (GERAK BENERAN) -->
-    <video autoplay loop muted playsinline class="bg-video">
-        <!-- Link video anime dark aesthetic -->
-        <source src="https://files.catbox.moe/0gt6hh.mp4" type="video/mp4">
-    </video>
-    <!-- LAPISAN GELAP BIAR TEKS KEBACA -->
+    <div id="bg-container"></div>
     <div class="bg-overlay"></div>
 
-    <!-- EFEK PARTIKEL NEON -->
-    <div class="particles" id="particles"></div>
-
-    <!-- NAVBAR -->
     <nav>
-        <div class="logo">&lt;[NamaLu] /&gt;</div>
-        <div class="links">
-            <a href="#home">Home</a>
-            <a href="#about">About</a>
-            <a href="#skills">Skills</a>
-            <a href="#projects">Projects</a>
-        </div>
+        <div class="logo">&lt;TG_DNA /&gt;</div>
+        <div class="links"><a href="#" class="active">System</a></div>
     </nav>
 
-    <!-- HERO SECTION -->
-    <section id="home" class="hero">
-        <div class="hero-content">
-            <p class="greeting">> Hello World, I am Development</p>
-            <h1 class="name">[Jaedvn not Dev]</h1>
-            <h2 class="role" id="typewriter"></h2>
-            <p class="desc">A passionate developer creating weird and wonderful things for the web. I turn coffee into code and bugs into features.</p>
-            <div class="cta">
-                <a href="#projects" class="btn primary">View My Work</a>
-                <a href="#contact" class="btn outline">Contact Me</a>
+    <main class="container">
+        <div class="header-section reveal">
+            <h1 class="title">Telegram <span class="neon-text">DNA</span></h1>
+            <p class="subtitle">OSINT Engine & Account Inspector</p>
+        </div>
+
+        <!-- LOGIN SECTION -->
+        <div class="glass-panel reveal" id="authPanel">
+            <div class="input-card">
+                <div class="input-group"><input type="text" id="phone" placeholder="+62812345678"></div>
+                <div class="input-group"><input type="number" id="apiId" placeholder="API ID"></div>
+                <div class="input-group"><input type="password" id="apiHash" placeholder="API HASH"></div>
+                <button class="btn-primary" id="btnSend" onclick="sendOTP()">LOGIN AUTH</button>
+            </div>
+            <div class="input-card hidden" id="stepOTP">
+                <div class="input-group"><input type="text" id="otpCode" placeholder="Kode OTP"></div>
+                <button class="btn-primary" id="btnVerify" onclick="verifyOTP()">VERIFY OTP</button>
+            </div>
+            <div class="input-card hidden" id="step2FA">
+                <div class="input-group"><input type="password" id="twoFA" placeholder="Password 2FA"></div>
+                <button class="btn-primary" id="btn2FA" onclick="verify2FA()">VERIFY 2FA</button>
             </div>
         </div>
-    </section>
 
-    <!-- ABOUT SECTION -->
-    <section id="about" class="container reveal">
-        <h2 class="section-title">01. About Me</h2>
-        <div class="glass-card">
-            <p>Halo! Gue adalah seorang developer yang fokus di bidang <strong>Web Development</strong> dan <strong>Cybersecurity</strong>. Gue suka ngebangun sistem dari nol, ngulik celah keamanan, dan bikin UI yang enak diliat.</p>
-            <p>Selain ngoding, gue juga sering nge-grind game, baca dokumentasi hal-hal random, dan ngulik tools baru. Gue percaya kalo kode yang bagus itu bukan cuma yang jalan, tapi yang juga bisa dibaca sama manusia.</p>
-        </div>
-    </section>
+        <!-- MAIN MENU -->
+        <div id="mainMenu" class="hidden">
+            <div class="menu-grid reveal">
+                <button class="menu-btn" onclick="selectType('User')">
+                    <span class="icon">👤</span> User
+                </button>
+                <button class="menu-btn" onclick="selectType('Channel')">
+                    <span class="icon">📢</span> Channel
+                </button>
+                <button class="menu-btn" onclick="selectType('Group')">
+                    <span class="icon">👥</span> Group
+                </button>
+                <button class="menu-btn" onclick="selectType('Bot')">
+                    <span class="icon">🤖</span> Bot
+                </button>
+            </div>
 
-    <!-- SKILLS SECTION -->
-    <section id="skills" class="container reveal">
-        <h2 class="section-title">02. My Arsenal</h2>
-        <div class="skills-grid">
-            <div class="skill-tag">HTML5</div>
-            <div class="skill-tag">CSS3</div>
-            <div class="skill-tag">JavaScript</div>
-            <div class="skill-tag">Node.js</div>
-            <div class="skill-tag">Python</div>
-            <div class="skill-tag">React</div>
-            <div class="skill-tag">Linux</div>
-            <div class="skill-tag">Git & GitHub</div>
-        </div>
-    </section>
-
-    <!-- PROJECTS SECTION -->
-    <section id="projects" class="container reveal">
-        <h2 class="section-title">03. Featured Projects</h2>
-        <div class="projects-grid">
-            
-            <!-- PROJECT CARD 1 -->
-            <div class="project-card">
-                <div class="project-img" style="background-image: url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=600&auto=format&fit=crop');"></div>
-                <div class="project-info">
-                    <h3>Cyber Scraper</h3>
-                    <p>Web scraper performa tinggi untuk mengekstrak data dari website statis dengan bypass anti-bot.</p>
-                    <div class="tech-stack">
-                        <span>Node.js</span><span>Cheerio</span>
+            <div class="glass-panel reveal hidden" id="targetPanel">
+                <h3 style="color: var(--primary); margin-bottom: 10px;" id="targetTitle">Masukkan Target User</h3>
+                <div class="input-card" style="padding: 0; flex-direction: row;">
+                    <div class="input-group">
+                        <input type="text" id="targetInput" placeholder="@username, t.me/username, atau ID">
                     </div>
+                    <button class="btn-primary" id="btnScan" onclick="startScan()">SCAN</button>
                 </div>
             </div>
-
-            <!-- PROJECT CARD 2 -->
-            <div class="project-card">
-                <div class="project-img" style="background-image: url('https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?q=80&w=600&auto=format&fit=crop');"></div>
-                <div class="project-info">
-                    <h3>Telegram Automation Bot</h3>
-                    <p>Bot Telegram dengan sistem session pool, auto-report, dan integrasi API untuk otomatisasi tugas.</p>
-                    <div class="tech-stack">
-                        <span>Python</span><span>MTProto</span>
-                    </div>
-                </div>
-            </div>
-
         </div>
-    </section>
 
-    <!-- FOOTER -->
-    <footer id="contact">
-        <p>Built with ❤️ & ☕ by [Jaedvn Not Dev]</p>
-        <p class="small">© 2024. All Rights Reserved.</p>
-    </footer>
+        <!-- TERMINAL OUTPUT -->
+        <div class="terminal-panel glass-panel reveal" style="margin-top: 20px;">
+            <div class="terminal-header">
+                <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+                <span class="title">dna_result.txt</span>
+            </div>
+            <div class="terminal-body" id="terminalOutput">
+                <div class="log-line">> System initialized. Waiting for auth...</div>
+            </div>
+        </div>
+    </main>
 
     <script src="script.js"></script>
 </body>
